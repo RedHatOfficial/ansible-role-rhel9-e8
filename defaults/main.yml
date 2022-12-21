@@ -77,6 +77,7 @@ package_ypbind_removed: true
 patch_strategy: true
 reboot_required: true
 restrict_strategy: true
+rpm_verify_hashes: true
 rpm_verify_ownership: true
 rpm_verify_permissions: true
 security_patches_up_to_date: true
