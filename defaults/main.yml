@@ -6,6 +6,7 @@ var_auditd_flush: incremental_async
 sysctl_kernel_kptr_restrict_value: '1'
 var_selinux_policy_name: targeted
 var_selinux_state: enforcing
+accounts_no_uid_except_zero: true
 audit_rules_dac_modification_chmod: true
 audit_rules_dac_modification_chown: true
 audit_rules_execution_chcon: true
@@ -58,6 +59,7 @@ medium_severity: true
 mount_option_dev_shm_nodev: true
 mount_option_dev_shm_noexec: true
 mount_option_dev_shm_nosuid: true
+network_sniffer_disabled: true
 no_empty_passwords: true
 no_reboot_needed: true
 package_fapolicyd_installed: true
