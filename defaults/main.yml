@@ -2,7 +2,9 @@
 # defaults file for rhel9_e8
 var_system_crypto_policy: DEFAULT:NO-SHA1
 var_authselect_profile: sssd
+var_accounts_passwords_pam_faillock_dir: /var/log/faillock
 var_auditd_flush: incremental_async
+var_auditd_name_format: hostname
 sysctl_kernel_kptr_restrict_value: '1'
 var_selinux_policy_name: targeted
 var_selinux_state: enforcing
