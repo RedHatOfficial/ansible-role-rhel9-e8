@@ -452,7 +452,7 @@
   lineinfile:
     dest: /etc/sysconfig/sshd
     state: absent
-    regexp: ^\s*(?i)CRYPTO_POLICY.*$
+    regexp: ^(?i)\s*CRYPTO_POLICY.*$
   tags:
   - CCE-83445-7
   - NIST-800-53-AC-17(2)
@@ -2688,6 +2688,78 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
+- name: Check if watch rule for /etc/sudoers already exists in /etc/audit/audit.rules
+  find:
+    paths: /etc/audit/
+    contains: ^\s*-w\s+/etc/sudoers\s+-p\s+wa(\s|$)+
+    patterns: audit.rules
+  register: find_existing_watch_audit_rules
+  when:
+  - audit_rules_sysadmin_actions | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"audit" in ansible_facts.packages'
+  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  tags:
+  - CCE-83729-4
+  - CJIS-5.4.1.1
+  - NIST-800-171-3.1.7
+  - NIST-800-53-AC-2(7)(b)
+  - NIST-800-53-AC-6(9)
+  - NIST-800-53-AU-12(c)
+  - NIST-800-53-AU-2(d)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSS-Req-10.2.2
+  - PCI-DSS-Req-10.2.5.b
+  - PCI-DSSv4-10.2.1.5
+  - PCI-DSSv4-10.2.2
+  - audit_rules_sysadmin_actions
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+
+- name: Add watch rule for /etc/sudoers in /etc/audit/audit.rules
+  lineinfile:
+    line: -w /etc/sudoers -p wa -k actions
+    state: present
+    dest: /etc/audit/audit.rules
+    create: true
+    mode: '0640'
+  when:
+  - audit_rules_sysadmin_actions | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"audit" in ansible_facts.packages'
+  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
+  tags:
+  - CCE-83729-4
+  - CJIS-5.4.1.1
+  - NIST-800-171-3.1.7
+  - NIST-800-53-AC-2(7)(b)
+  - NIST-800-53-AC-6(9)
+  - NIST-800-53-AU-12(c)
+  - NIST-800-53-AU-2(d)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSS-Req-10.2.2
+  - PCI-DSS-Req-10.2.5.b
+  - PCI-DSSv4-10.2.1.5
+  - PCI-DSSv4-10.2.2
+  - audit_rules_sysadmin_actions
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+
 - name: Check if watch rule for /etc/sudoers already exists in /etc/audit/rules.d/
   find:
     paths: /etc/audit/rules.d
@@ -2865,10 +2937,10 @@
   - no_reboot_needed
   - restrict_strategy
 
-- name: Check if watch rule for /etc/sudoers already exists in /etc/audit/audit.rules
+- name: Check if watch rule for /etc/sudoers.d/ already exists in /etc/audit/audit.rules
   find:
     paths: /etc/audit/
-    contains: ^\s*-w\s+/etc/sudoers\s+-p\s+wa(\s|$)+
+    contains: ^\s*-w\s+/etc/sudoers.d/\s+-p\s+wa(\s|$)+
     patterns: audit.rules
   register: find_existing_watch_audit_rules
   when:
@@ -2900,9 +2972,9 @@
   - no_reboot_needed
   - restrict_strategy
 
-- name: Add watch rule for /etc/sudoers in /etc/audit/audit.rules
+- name: Add watch rule for /etc/sudoers.d/ in /etc/audit/audit.rules
   lineinfile:
-    line: -w /etc/sudoers -p wa -k actions
+    line: -w /etc/sudoers.d/ -p wa -k actions
     state: present
     dest: /etc/audit/audit.rules
     create: true
@@ -3114,78 +3186,6 @@
   - no_reboot_needed
   - restrict_strategy
 
-- name: Check if watch rule for /etc/sudoers.d/ already exists in /etc/audit/audit.rules
-  find:
-    paths: /etc/audit/
-    contains: ^\s*-w\s+/etc/sudoers.d/\s+-p\s+wa(\s|$)+
-    patterns: audit.rules
-  register: find_existing_watch_audit_rules
-  when:
-  - audit_rules_sysadmin_actions | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
-  - restrict_strategy | bool
-  - '"audit" in ansible_facts.packages'
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  tags:
-  - CCE-83729-4
-  - CJIS-5.4.1.1
-  - NIST-800-171-3.1.7
-  - NIST-800-53-AC-2(7)(b)
-  - NIST-800-53-AC-6(9)
-  - NIST-800-53-AU-12(c)
-  - NIST-800-53-AU-2(d)
-  - NIST-800-53-CM-6(a)
-  - PCI-DSS-Req-10.2.2
-  - PCI-DSS-Req-10.2.5.b
-  - PCI-DSSv4-10.2.1.5
-  - PCI-DSSv4-10.2.2
-  - audit_rules_sysadmin_actions
-  - low_complexity
-  - low_disruption
-  - medium_severity
-  - no_reboot_needed
-  - restrict_strategy
-
-- name: Add watch rule for /etc/sudoers.d/ in /etc/audit/audit.rules
-  lineinfile:
-    line: -w /etc/sudoers.d/ -p wa -k actions
-    state: present
-    dest: /etc/audit/audit.rules
-    create: true
-    mode: '0640'
-  when:
-  - audit_rules_sysadmin_actions | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
-  - restrict_strategy | bool
-  - '"audit" in ansible_facts.packages'
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
-  tags:
-  - CCE-83729-4
-  - CJIS-5.4.1.1
-  - NIST-800-171-3.1.7
-  - NIST-800-53-AC-2(7)(b)
-  - NIST-800-53-AC-6(9)
-  - NIST-800-53-AU-12(c)
-  - NIST-800-53-AU-2(d)
-  - NIST-800-53-CM-6(a)
-  - PCI-DSS-Req-10.2.2
-  - PCI-DSS-Req-10.2.5.b
-  - PCI-DSSv4-10.2.1.5
-  - PCI-DSSv4-10.2.2
-  - audit_rules_sysadmin_actions
-  - low_complexity
-  - low_disruption
-  - medium_severity
-  - no_reboot_needed
-  - restrict_strategy
-
 - name: Gather the package facts
   package_facts:
     manager: auto
@@ -3224,6 +3224,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - not ( ansible_architecture == "aarch64" )
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -3346,6 +3347,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - not ( ansible_architecture == "aarch64" )
   tags:
   - CCE-83830-0
   - CJIS-5.4.1.1
@@ -3466,6 +3468,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - not ( ansible_architecture == "aarch64" )
   - audit_arch == "b64"
   tags:
   - CCE-83830-0
@@ -3521,6 +3524,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - not ( ansible_architecture == "aarch64" )
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -3645,6 +3649,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - not ( ansible_architecture == "aarch64" )
   tags:
   - CCE-83812-8
   - CJIS-5.4.1.1
@@ -3767,6 +3772,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - not ( ansible_architecture == "aarch64" )
   - audit_arch == "b64"
   tags:
   - CCE-83812-8
@@ -4943,10 +4949,10 @@
   - reboot_required | bool
   - restrict_strategy | bool
 
-- name: Check if watch rule for /var/log/faillock already exists in /etc/audit/rules.d/
+- name: Check if watch rule for {{ var_accounts_passwords_pam_faillock_dir }} already exists in /etc/audit/rules.d/
   find:
     paths: /etc/audit/rules.d
-    contains: ^\s*-w\s+/var/log/faillock\s+-p\s+wa(\s|$)+
+    contains: ^\s*-w\s+{{ var_accounts_passwords_pam_faillock_dir }}\s+-p\s+wa(\s|$)+
     patterns: '*.rules'
   register: find_existing_watch_rules_d
   when:
@@ -5068,10 +5074,10 @@
   - reboot_required
   - restrict_strategy
 
-- name: Add watch rule for /var/log/faillock in /etc/audit/rules.d/
+- name: Add watch rule for {{ var_accounts_passwords_pam_faillock_dir }} in /etc/audit/rules.d/
   lineinfile:
     path: '{{ all_files[0] }}'
-    line: -w /var/log/faillock -p wa -k logins
+    line: -w {{ var_accounts_passwords_pam_faillock_dir }} -p wa -k logins
     create: true
     mode: '0640'
   when:
@@ -5100,10 +5106,10 @@
   - reboot_required
   - restrict_strategy
 
-- name: Check if watch rule for /var/log/faillock already exists in /etc/audit/audit.rules
+- name: Check if watch rule for {{ var_accounts_passwords_pam_faillock_dir }} already exists in /etc/audit/audit.rules
   find:
     paths: /etc/audit/
-    contains: ^\s*-w\s+/var/log/faillock\s+-p\s+wa(\s|$)+
+    contains: ^\s*-w\s+{{ var_accounts_passwords_pam_faillock_dir }}\s+-p\s+wa(\s|$)+
     patterns: audit.rules
   register: find_existing_watch_audit_rules
   when:
@@ -5131,9 +5137,9 @@
   - reboot_required
   - restrict_strategy
 
-- name: Add watch rule for /var/log/faillock in /etc/audit/audit.rules
+- name: Add watch rule for {{ var_accounts_passwords_pam_faillock_dir }} in /etc/audit/audit.rules
   lineinfile:
-    line: -w /var/log/faillock -p wa -k logins
+    line: -w {{ var_accounts_passwords_pam_faillock_dir }} -p wa -k logins
     state: present
     dest: /etc/audit/audit.rules
     create: true
@@ -6679,6 +6685,7 @@
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( not ( ansible_architecture == "aarch64" ) and not ( ansible_architecture == "s390x" ) )
   tags:
   - CCE-83835-9
   - CJIS-5.4.1.1
@@ -7034,7 +7041,7 @@
   - name: Check for duplicate values
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*freq\s*=\s*
       state: absent
     check_mode: true
@@ -7043,7 +7050,7 @@
   - name: Deduplicate values from /etc/audit/auditd.conf
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*freq\s*=\s*
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -7098,7 +7105,7 @@
   - name: Check for duplicate values
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*local_events\s*=\s*
       state: absent
     check_mode: true
@@ -7107,7 +7114,7 @@
   - name: Deduplicate values from /etc/audit/auditd.conf
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*local_events\s*=\s*
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -7163,7 +7170,7 @@
   - name: Check for duplicate values
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*log_format\s*=\s*
       state: absent
     check_mode: true
@@ -7172,7 +7179,7 @@
   - name: Deduplicate values from /etc/audit/auditd.conf
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*log_format\s*=\s*
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -7224,12 +7231,34 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Set hostname as computer node name in audit logs
+- name: Set type of computer node name logging in audit logs - Define Value to Be Used in the Remediation
+  ansible.builtin.set_fact: auditd_name_format_split="{{ var_auditd_name_format.split('|')[0] }}"
+  when:
+  - auditd_name_format | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"audit" in ansible_facts.packages'
+  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  tags:
+  - CCE-83686-6
+  - NIST-800-53-AU-3
+  - NIST-800-53-CM-6
+  - auditd_name_format
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+
+- name: Set type of computer node name logging in audit logs
   block:
   - name: Check for duplicate values
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*name_format\s*=\s*
       state: absent
     check_mode: true
@@ -7238,7 +7267,7 @@
   - name: Deduplicate values from /etc/audit/auditd.conf
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*name_format\s*=\s*
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -7247,7 +7276,7 @@
       path: /etc/audit/auditd.conf
       create: true
       regexp: (?i)^\s*name_format\s*=\s*
-      line: name_format = hostname
+      line: name_format = {{ auditd_name_format_split }}
       state: present
   when:
   - auditd_name_format | bool
@@ -7294,7 +7323,7 @@
   - name: Check for duplicate values
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*write_logs\s*=\s*
       state: absent
     check_mode: true
@@ -7303,7 +7332,7 @@
   - name: Deduplicate values from /etc/audit/auditd.conf
     lineinfile:
       path: /etc/audit/auditd.conf
-      create: false
+      create: true
       regexp: (?i)^\s*write_logs\s*=\s*
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -7526,14 +7555,34 @@
   - no_reboot_needed
   - service_firewalld_enabled
 
-- name: Get all world-writable directories with no sticky bits set
-  shell: 'set -o pipefail
-
-    df --local -P | awk ''{if (NR!=1) print $6}'' | xargs -I ''{}'' find ''{}'' -xdev -type d \( -perm -0002 -a ! -perm -1000
-    \) 2>/dev/null
-
-    '
-  register: dir_output
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Define Excluded (Non-Local) File Systems and Paths
+  ansible.builtin.set_fact:
+    excluded_fstypes:
+    - afs
+    - ceph
+    - cifs
+    - smb3
+    - smbfs
+    - sshfs
+    - ncpfs
+    - ncp
+    - nfs
+    - nfs4
+    - gfs
+    - gfs2
+    - glusterfs
+    - gpfs
+    - pvfs2
+    - ocfs2
+    - lustre
+    - davfs
+    - fuse.sshfs
+    excluded_paths:
+    - dev
+    - proc
+    - run
+    - sys
+    search_paths: []
   tags:
   - CCE-83895-3
   - NIST-800-53-AC-6(1)
@@ -7552,12 +7601,179 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Ensure sticky bit is set
-  file:
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Find Relevant Root Directories Ignoring Pre-Defined
+    Excluded Paths
+  ansible.builtin.find:
+    paths: /
+    file_type: directory
+    excludes: '{{ excluded_paths }}'
+    hidden: true
+    recurse: false
+  register: result_relevant_root_dirs
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Include Relevant Root Directories in a List of Paths
+    to be Searched
+  ansible.builtin.set_fact:
+    search_paths: '{{ search_paths | union([item.path]) }}'
+  loop: '{{ result_relevant_root_dirs.files }}'
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Increment Search Paths List with Local Partitions
+    Mount Points
+  ansible.builtin.set_fact:
+    search_paths: '{{ search_paths | union([item.mount]) }}'
+  loop: '{{ ansible_mounts }}'
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - item.fstype not in excluded_fstypes
+  - item.mount != '/'
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Increment Search Paths List with Local NFS File
+    System Targets
+  ansible.builtin.set_fact:
+    search_paths: '{{ search_paths | union([item.device.split('':'')[1]]) }}'
+  loop: '{{ ansible_mounts }}'
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - item.device is search("localhost:")
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Define Rule Specific Facts
+  ansible.builtin.set_fact:
+    world_writable_dirs: []
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Find All Uncompliant Directories in Local File Systems
+  ansible.builtin.command:
+    cmd: find {{ item }} -xdev -type d ( -perm -0002 -a ! -perm -1000 )
+  loop: '{{ search_paths }}'
+  changed_when: false
+  register: result_found_dirs
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Create List of World Writable Directories Without
+    Sticky Bit
+  ansible.builtin.set_fact:
+    world_writable_dirs: '{{ world_writable_dirs | union(item.stdout_lines) | list }}'
+  loop: '{{ result_found_dirs.results }}'
+  tags:
+  - CCE-83895-3
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - dir_perms_world_writable_sticky_bits
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Ensure Sticky Bit is Set on Local World Writable
+    Directories
+  ansible.builtin.file:
     path: '{{ item }}'
     mode: a+t
-  with_items:
-  - '{{ dir_output.stdout_lines }}'
+  loop: '{{ world_writable_dirs }}'
   tags:
   - CCE-83895-3
   - NIST-800-53-AC-6(1)
@@ -9170,7 +9386,7 @@
   - name: Check for duplicate values
     lineinfile:
       path: /etc/selinux/config
-      create: false
+      create: true
       regexp: ^SELINUXTYPE=
       state: absent
     check_mode: true
@@ -9179,7 +9395,7 @@
   - name: Deduplicate values from /etc/selinux/config
     lineinfile:
       path: /etc/selinux/config
-      create: false
+      create: true
       regexp: ^SELINUXTYPE=
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -9218,7 +9434,7 @@
   - name: Check for duplicate values
     lineinfile:
       path: /etc/selinux/config
-      create: false
+      create: true
       regexp: ^SELINUX=
       state: absent
     check_mode: true
@@ -9227,7 +9443,7 @@
   - name: Deduplicate values from /etc/selinux/config
     lineinfile:
       path: /etc/selinux/config
-      create: false
+      create: true
       regexp: ^SELINUX=
       state: absent
     when: dupes.found is defined and dupes.found > 1
@@ -9924,7 +10140,7 @@
       regexp: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
       line: PermitEmptyPasswords no
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - high_severity | bool
@@ -9987,7 +10203,7 @@
       regexp: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
       line: GSSAPIAuthentication no
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10046,7 +10262,7 @@
       regexp: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
       line: IgnoreRhosts yes
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10107,7 +10323,7 @@
       regexp: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
       line: PermitRootLogin no
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10173,7 +10389,7 @@
       regexp: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
       line: IgnoreUserKnownHosts yes
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10232,7 +10448,7 @@
       regexp: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
       line: PermitUserEnvironment no
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10294,7 +10510,7 @@
       regexp: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+
       line: StrictModes yes
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10352,7 +10568,7 @@
       regexp: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
       line: PrintLastLog yes
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
@@ -10408,7 +10624,7 @@
       regexp: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+
       line: LogLevel INFO
       state: present
-      insertbefore: ^[#\s]*Match
+      insertbefore: BOF
       validate: /usr/sbin/sshd -t -f %s
   when:
   - low_complexity | bool
