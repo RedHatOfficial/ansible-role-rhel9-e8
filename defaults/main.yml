@@ -141,7 +141,6 @@ package_talk_removed: true
 package_talk_server_removed: true
 package_telnet_removed: true
 package_telnet_server_removed: true
-package_xinetd_removed: true
 package_ypbind_removed: true
 patch_strategy: true
 reboot_required: true
@@ -159,7 +158,6 @@ service_firewalld_enabled: true
 service_rsyslog_enabled: true
 service_squid_disabled: true
 service_telnet_disabled: true
-service_xinetd_disabled: true
 skip_ansible_lint: true
 sshd_disable_empty_passwords: true
 sshd_disable_gssapi_auth: true
