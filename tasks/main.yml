@@ -1,4 +1,4 @@
-- name: 'Set fact: Package manager reinstall command (dnf)'
+- name: 'Set fact: Package manager reinstall command'
   set_fact:
     package_manager_reinstall_cmd: dnf reinstall -y
   when:
@@ -9,40 +9,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_hashes | bool
-  - ansible_distribution == "Fedora"
-  tags:
-  - CCE-90841-8
-  - CJIS-5.10.4.1
-  - DISA-STIG-RHEL-09-214030
-  - NIST-800-171-3.3.8
-  - NIST-800-171-3.4.1
-  - NIST-800-53-AU-9(3)
-  - NIST-800-53-CM-6(c)
-  - NIST-800-53-CM-6(d)
-  - NIST-800-53-SI-7
-  - NIST-800-53-SI-7(1)
-  - NIST-800-53-SI-7(6)
-  - PCI-DSS-Req-11.5
-  - PCI-DSSv4-11.5.2
-  - high_complexity
-  - high_severity
-  - medium_disruption
-  - no_reboot_needed
-  - restrict_strategy
-  - rpm_verify_hashes
-
-- name: 'Set fact: Package manager reinstall command (yum)'
-  set_fact:
-    package_manager_reinstall_cmd: yum reinstall -y
-  when:
-  - DISA_STIG_RHEL_09_214030 | bool
-  - high_complexity | bool
-  - high_severity | bool
-  - medium_disruption | bool
-  - no_reboot_needed | bool
-  - restrict_strategy | bool
-  - rpm_verify_hashes | bool
-  - (ansible_distribution == "RedHat" or ansible_distribution == "CentOS" or ansible_distribution == "OracleLinux")
+  - ansible_distribution in [ "Fedora", "RedHat", "CentOS", "OracleLinux" ]
   tags:
   - CCE-90841-8
   - CJIS-5.10.4.1
@@ -478,7 +445,7 @@
   lineinfile:
     dest: /etc/sysconfig/sshd
     state: absent
-    regexp: ^(?i)\s*CRYPTO_POLICY.*$
+    regexp: (?i)^\s*CRYPTO_POLICY.*$
   tags:
   - CCE-83445-7
   - DISA-STIG-RHEL-09-255055
@@ -790,7 +757,7 @@
   - low_complexity | bool
   - medium_disruption | bool
   - no_reboot_needed | bool
-  - '"yum" in ansible_facts.packages'
+  - '"dnf" in ansible_facts.packages'
   tags:
   - CCE-83457-2
   - CJIS-5.10.4.1
@@ -869,7 +836,7 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - unknown_strategy | bool
-  - '"yum" in ansible_facts.packages'
+  - '"dnf" in ansible_facts.packages'
   tags:
   - CCE-83463-0
   - DISA-STIG-RHEL-09-214020
@@ -934,7 +901,17 @@
     option: gpgcheck
     value: '1'
     no_extra_spaces: true
-  loop: '{{ repo_grep_results.stdout | regex_findall( ''(.+\.repo):\[(.+)\]\n?'' ) }}'
+  loop: '{{ repo_grep_results.stdout |regex_findall( ''(.+\.repo):\[(.+)\]\n?'' ) if repo_grep_results is not skipped else
+    []}}'
+  when:
+  - DISA_STIG_RHEL_09_214025 | bool
+  - enable_strategy | bool
+  - ensure_gpgcheck_never_disabled | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - no_reboot_needed | bool
+  - repo_grep_results is not skipped
   tags:
   - CCE-83464-8
   - CJIS-5.10.4.1
@@ -957,14 +934,6 @@
   - low_complexity
   - medium_disruption
   - no_reboot_needed
-  when:
-  - DISA_STIG_RHEL_09_214025 | bool
-  - enable_strategy | bool
-  - ensure_gpgcheck_never_disabled | bool
-  - high_severity | bool
-  - low_complexity | bool
-  - medium_disruption | bool
-  - no_reboot_needed | bool
 
 - name: Read permission of GPG key directory
   stat:
@@ -1064,7 +1033,9 @@
 
 - name: Set Fact - Valid fingerprints
   set_fact:
-    gpg_valid_fingerprints: ("567E347AD0044ADE55BA8A5F199E2F91FD431D51" "7E4624258C406535D56D6F135054E4A45A6340B3")
+    gpg_valid_fingerprints:
+    - 567E347AD0044ADE55BA8A5F199E2F91FD431D51
+    - 7E4624258C406535D56D6F135054E4A45A6340B3
   tags:
   - CCE-84180-9
   - CJIS-5.10.4.1
@@ -7950,6 +7921,15 @@
   ansible.builtin.set_fact:
     world_writable_dirs: '{{ world_writable_dirs | union(item.stdout_lines) | list }}'
   loop: '{{ result_found_dirs.results }}'
+  when:
+  - DISA_STIG_RHEL_09_232245 | bool
+  - dir_perms_world_writable_sticky_bits | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - result_found_dirs is not skipped and item is not skipped
   tags:
   - CCE-83895-3
   - DISA-STIG-RHEL-09-232245
@@ -7962,14 +7942,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-  when:
-  - DISA_STIG_RHEL_09_232245 | bool
-  - dir_perms_world_writable_sticky_bits | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
-  - restrict_strategy | bool
 
 - name: Verify that All World-Writable Directories Have Sticky Bits Set - Ensure Sticky Bit is Set on Local World Writable
     Directories
@@ -8653,6 +8625,7 @@
   - no_reboot_needed | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
   - ("" | length == 0)
+  - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length == 0)
   tags:
   - CCE-83881-3
@@ -8715,6 +8688,7 @@
   - mount_option_dev_shm_nodev | bool
   - no_reboot_needed | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - mount_info is defined
   - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("" | length == 0)
   tags:
   - CCE-83881-3
@@ -8817,6 +8791,7 @@
   - no_reboot_needed | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
   - ("" | length == 0)
+  - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length == 0)
   tags:
   - CCE-83857-3
@@ -8879,6 +8854,7 @@
   - mount_option_dev_shm_noexec | bool
   - no_reboot_needed | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - mount_info is defined
   - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("" | length == 0)
   tags:
   - CCE-83857-3
@@ -8981,6 +8957,7 @@
   - no_reboot_needed | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
   - ("" | length == 0)
+  - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length == 0)
   tags:
   - CCE-83891-2
@@ -9043,6 +9020,7 @@
   - mount_option_dev_shm_nosuid | bool
   - no_reboot_needed | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - mount_info is defined
   - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("" | length == 0)
   tags:
   - CCE-83891-2
@@ -9802,6 +9780,29 @@
   - restrict_strategy
   - selinux_state
 
+- name: Gather the package facts
+  package_facts:
+    manager: auto
+  tags:
+  - CCE-90824-4
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSSv4-2.2.4
+  - disable_strategy
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - service_avahi-daemon_disabled
+  when:
+  - disable_strategy | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - service_avahi_daemon_disabled | bool
+
 - name: Block Disable service avahi-daemon
   block:
   - name: Disable service avahi-daemon
@@ -9822,7 +9823,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - service_avahi_daemon_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "avahi" in ansible_facts.packages
+    )
   tags:
   - CCE-90824-4
   - NIST-800-53-CM-6(a)
@@ -9849,7 +9851,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - service_avahi_daemon_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "avahi" in ansible_facts.packages
+    )
   tags:
   - CCE-90824-4
   - NIST-800-53-CM-6(a)
@@ -9876,7 +9879,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - service_avahi_daemon_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "avahi" in ansible_facts.packages
+    )
   - socket_file_exists.stdout_lines is search("avahi-daemon.socket",multiline=True)
   tags:
   - CCE-90824-4
@@ -9949,120 +9953,6 @@
   - medium_severity
   - no_reboot_needed
   - service_fapolicyd_enabled
-
-- name: Ensure xinetd is removed
-  package:
-    name: xinetd
-    state: absent
-  when:
-  - disable_strategy | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - low_severity | bool
-  - no_reboot_needed | bool
-  - package_xinetd_removed | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  tags:
-  - CCE-84155-1
-  - NIST-800-53-CM-6(a)
-  - NIST-800-53-CM-7(a)
-  - NIST-800-53-CM-7(b)
-  - PCI-DSSv4-2.2.4
-  - disable_strategy
-  - low_complexity
-  - low_disruption
-  - low_severity
-  - no_reboot_needed
-  - package_xinetd_removed
-
-- name: Block Disable service xinetd
-  block:
-  - name: Disable service xinetd
-    block:
-    - name: Disable service xinetd
-      systemd:
-        name: xinetd.service
-        enabled: 'no'
-        state: stopped
-        masked: 'yes'
-    rescue:
-    - name: Intentionally ignored previous 'Disable service xinetd' failure, service was already disabled
-      meta: noop
-  when:
-  - disable_strategy | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
-  - service_xinetd_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  tags:
-  - CCE-84156-9
-  - NIST-800-171-3.4.7
-  - NIST-800-53-CM-6(a)
-  - NIST-800-53-CM-7(a)
-  - NIST-800-53-CM-7(b)
-  - disable_strategy
-  - low_complexity
-  - low_disruption
-  - medium_severity
-  - no_reboot_needed
-  - service_xinetd_disabled
-
-- name: Unit Socket Exists - xinetd.socket
-  command: systemctl -q list-unit-files xinetd.socket
-  register: socket_file_exists
-  changed_when: false
-  failed_when: socket_file_exists.rc not in [0, 1]
-  check_mode: false
-  when:
-  - disable_strategy | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
-  - service_xinetd_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  tags:
-  - CCE-84156-9
-  - NIST-800-171-3.4.7
-  - NIST-800-53-CM-6(a)
-  - NIST-800-53-CM-7(a)
-  - NIST-800-53-CM-7(b)
-  - disable_strategy
-  - low_complexity
-  - low_disruption
-  - medium_severity
-  - no_reboot_needed
-  - service_xinetd_disabled
-
-- name: Disable socket xinetd
-  systemd:
-    name: xinetd.socket
-    enabled: 'no'
-    state: stopped
-    masked: 'yes'
-  when:
-  - disable_strategy | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
-  - service_xinetd_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  - socket_file_exists.stdout_lines is search("xinetd.socket",multiline=True)
-  tags:
-  - CCE-84156-9
-  - NIST-800-171-3.4.7
-  - NIST-800-53-CM-6(a)
-  - NIST-800-53-CM-7(a)
-  - NIST-800-53-CM-7(b)
-  - disable_strategy
-  - low_complexity
-  - low_disruption
-  - medium_severity
-  - no_reboot_needed
-  - service_xinetd_disabled
 
 - name: Ensure ypbind is removed
   package:
@@ -10225,6 +10115,31 @@
   - no_reboot_needed | bool
   - package_telnet_removed | bool
 
+- name: Gather the package facts
+  package_facts:
+    manager: auto
+  tags:
+  - CCE-84150-2
+  - NIST-800-171-3.1.13
+  - NIST-800-171-3.4.7
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - NIST-800-53-IA-5(1)(c)
+  - disable_strategy
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - service_telnet_disabled
+  when:
+  - disable_strategy | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - service_telnet_disabled | bool
+
 - name: Block Disable service telnet
   block:
   - name: Disable service telnet
@@ -10245,7 +10160,8 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - service_telnet_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "telnet-server" in ansible_facts.packages
+    )
   tags:
   - CCE-84150-2
   - NIST-800-171-3.1.13
@@ -10274,7 +10190,8 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - service_telnet_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "telnet-server" in ansible_facts.packages
+    )
   tags:
   - CCE-84150-2
   - NIST-800-171-3.1.13
@@ -10303,7 +10220,8 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - service_telnet_disabled | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "telnet-server" in ansible_facts.packages
+    )
   - socket_file_exists.stdout_lines is search("telnet.socket",multiline=True)
   tags:
   - CCE-84150-2
@@ -10340,6 +10258,25 @@
   - package_squid_removed | bool
   - unknown_severity | bool
 
+- name: Gather the package facts
+  package_facts:
+    manager: auto
+  tags:
+  - CCE-84239-3
+  - disable_strategy
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - service_squid_disabled
+  - unknown_severity
+  when:
+  - disable_strategy | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - service_squid_disabled | bool
+  - unknown_severity | bool
+
 - name: Block Disable service squid
   block:
   - name: Disable service squid
@@ -10360,7 +10297,8 @@
   - no_reboot_needed | bool
   - service_squid_disabled | bool
   - unknown_severity | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "squid" in ansible_facts.packages
+    )
   tags:
   - CCE-84239-3
   - disable_strategy
@@ -10383,7 +10321,8 @@
   - no_reboot_needed | bool
   - service_squid_disabled | bool
   - unknown_severity | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "squid" in ansible_facts.packages
+    )
   tags:
   - CCE-84239-3
   - disable_strategy
@@ -10406,7 +10345,8 @@
   - no_reboot_needed | bool
   - service_squid_disabled | bool
   - unknown_severity | bool
-  - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
+  - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "squid" in ansible_facts.packages
+    )
   - socket_file_exists.stdout_lines is search("squid.socket",multiline=True)
   tags:
   - CCE-84239-3
