@@ -22,6 +22,7 @@ DISA_STIG_RHEL_09_214025: true
 DISA_STIG_RHEL_09_215035: true
 DISA_STIG_RHEL_09_215040: true
 DISA_STIG_RHEL_09_215065: true
+DISA_STIG_RHEL_09_215105: true
 DISA_STIG_RHEL_09_231110: true
 DISA_STIG_RHEL_09_231115: true
 DISA_STIG_RHEL_09_231120: true
@@ -36,6 +37,7 @@ DISA_STIG_RHEL_09_251040: true
 DISA_STIG_RHEL_09_251045: true
 DISA_STIG_RHEL_09_255040: true
 DISA_STIG_RHEL_09_255045: true
+DISA_STIG_RHEL_09_255075: true
 DISA_STIG_RHEL_09_255085: true
 DISA_STIG_RHEL_09_255135: true
 DISA_STIG_RHEL_09_255145: true
@@ -52,6 +54,7 @@ DISA_STIG_RHEL_09_611025: true
 DISA_STIG_RHEL_09_611085: true
 DISA_STIG_RHEL_09_652010: true
 DISA_STIG_RHEL_09_652020: true
+DISA_STIG_RHEL_09_653010: true
 DISA_STIG_RHEL_09_653015: true
 DISA_STIG_RHEL_09_653060: true
 DISA_STIG_RHEL_09_653075: true
@@ -69,7 +72,6 @@ DISA_STIG_RHEL_09_654255: true
 DISA_STIG_RHEL_09_654260: true
 DISA_STIG_RHEL_09_671010: true
 DISA_STIG_RHEL_09_672030: true
-DISA_STIG_RHEL_09_672045: true
 DISA_STIG_needed_rules: true
 accounts_no_uid_except_zero: true
 audit_rules_dac_modification_chmod: true
@@ -127,6 +129,7 @@ mount_option_dev_shm_nosuid: true
 network_sniffer_disabled: true
 no_empty_passwords: true
 no_reboot_needed: true
+package_audit_installed: true
 package_fapolicyd_installed: true
 package_firewalld_installed: true
 package_quagga_removed: true
