@@ -2,13 +2,12 @@
 # defaults file for rhel9_e8
 var_system_crypto_policy: DEFAULT:NO-SHA1
 var_authselect_profile: sssd
-var_accounts_passwords_pam_faillock_dir: /var/log/faillock
-var_auditd_flush: incremental_async
-var_auditd_name_format: hostname
 sysctl_kernel_kptr_restrict_value: '1'
 var_selinux_policy_name: targeted
 var_selinux_state: enforcing
-DISA_STIG_RHEL_09_211015: true
+var_accounts_passwords_pam_faillock_dir: /var/log/faillock
+var_auditd_flush: incremental_async
+var_auditd_name_format: hostname
 DISA_STIG_RHEL_09_213010: true
 DISA_STIG_RHEL_09_213020: true
 DISA_STIG_RHEL_09_213025: true
@@ -20,7 +19,6 @@ DISA_STIG_RHEL_09_214010: true
 DISA_STIG_RHEL_09_214015: true
 DISA_STIG_RHEL_09_214020: true
 DISA_STIG_RHEL_09_214025: true
-DISA_STIG_RHEL_09_214030: true
 DISA_STIG_RHEL_09_215035: true
 DISA_STIG_RHEL_09_215040: true
 DISA_STIG_RHEL_09_215065: true
@@ -73,6 +71,7 @@ DISA_STIG_RHEL_09_654260: true
 DISA_STIG_RHEL_09_671010: true
 DISA_STIG_RHEL_09_672030: true
 DISA_STIG_RHEL_09_672045: true
+DISA_STIG_needed_rules: true
 accounts_no_uid_except_zero: true
 audit_rules_dac_modification_chmod: true
 audit_rules_dac_modification_chown: true
@@ -142,13 +141,11 @@ package_talk_server_removed: true
 package_telnet_removed: true
 package_telnet_server_removed: true
 package_ypbind_removed: true
-patch_strategy: true
 reboot_required: true
 restrict_strategy: true
 rpm_verify_hashes: true
 rpm_verify_ownership: true
 rpm_verify_permissions: true
-security_patches_up_to_date: true
 selinux_policytype: true
 selinux_state: true
 service_auditd_enabled: true
@@ -158,7 +155,6 @@ service_firewalld_enabled: true
 service_rsyslog_enabled: true
 service_squid_disabled: true
 service_telnet_disabled: true
-skip_ansible_lint: true
 sshd_disable_empty_passwords: true
 sshd_disable_gssapi_auth: true
 sshd_disable_rhosts: true
