@@ -1113,10 +1113,11 @@
   - no_reboot_needed
   - restrict_strategy
 
-- name: Enable authselect - Select authselect profile
+- name: Enable authselect - Check Current authselect Profile
   ansible.builtin.command:
-    cmd: authselect select "{{ var_authselect_profile }}"
-  register: result_authselect_select
+    cmd: authselect current
+  register: result_authselect_current
+  changed_when: false
   failed_when: false
   tags:
   - CCE-89732-2
@@ -1138,10 +1139,11 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Enable authselect - Verify if PAM has been altered
+- name: Enable authselect - Try to Select an authselect Profile
   ansible.builtin.command:
-    cmd: rpm -qV pam
-  register: result_altered_authselect
+    cmd: authselect select "{{ var_authselect_profile }}"
+  register: result_authselect_select
+  changed_when: result_authselect_select.rc == 0
   failed_when: false
   when:
   - DISA_STIG_needed_rules | bool
@@ -1151,6 +1153,34 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
+  - result_authselect_current.rc != 0
+  tags:
+  - CCE-89732-2
+  - DISA-STIG-needed_rules
+  - NIST-800-53-AC-3
+  - PCI-DSSv4-8.3.4
+  - configure_strategy
+  - enable_authselect
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - no_reboot_needed
+
+- name: Enable authselect - Verify If pam Has Been Altered
+  ansible.builtin.command:
+    cmd: rpm -qV pam
+  register: result_altered_authselect
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_needed_rules | bool
+  - configure_strategy | bool
+  - enable_authselect | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - result_authselect_select is not skipped
   - result_authselect_select.rc != 0
   tags:
   - CCE-89732-2
@@ -1164,12 +1194,13 @@
   - medium_severity
   - no_reboot_needed
 
-- name: Enable authselect - Informative message based on the authselect integrity check
+- name: Enable authselect - Informative Message Based on authselect Integrity Check
   ansible.builtin.assert:
     that:
-    - result_altered_authselect is skipped or result_altered_authselect.rc == 0
+    - result_authselect_current.rc == 0 or result_altered_authselect is skipped or result_altered_authselect.rc == 0
     fail_msg:
-    - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
+    - authselect is not used but files from the 'pam' package have been altered, so the authselect configuration won't be
+      forced.
   tags:
   - CCE-89732-2
   - DISA-STIG-needed_rules
@@ -1190,7 +1221,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Enable authselect - Force authselect profile select
+- name: Enable authselect - Force authselect Profile Selection
   ansible.builtin.command:
     cmd: authselect select --force "{{ var_authselect_profile }}"
   when:
@@ -1201,8 +1232,9 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
+  - result_authselect_current.rc != 0
   - result_authselect_select.rc != 0
-  - result_altered_authselect is skipped or result_altered_authselect.rc == 0
+  - result_altered_authselect.rc == 0
   tags:
   - CCE-89732-2
   - DISA-STIG-needed_rules
@@ -1431,17 +1463,17 @@
   - no_reboot_needed
   - package_rsyslog_installed
 
-- name: Enable service rsyslog
+- name: Enable rsyslog Service - Enable service rsyslog
   block:
   - name: Gather the package facts
     package_facts:
       manager: auto
-  - name: Enable service rsyslog
-    systemd:
+  - name: Enable rsyslog Service - Enable Service rsyslog
+    ansible.builtin.systemd:
       name: rsyslog
-      enabled: 'yes'
+      enabled: true
       state: started
-      masked: 'no'
+      masked: false
     when:
     - '"rsyslog" in ansible_facts.packages'
   when:
@@ -1578,17 +1610,17 @@
   - no_reboot_needed | bool
   - service_firewalld_enabled | bool
 
-- name: Enable service firewalld
+- name: Verify firewalld Enabled - Enable service firewalld
   block:
   - name: Gather the package facts
     package_facts:
       manager: auto
-  - name: Enable service firewalld
-    systemd:
+  - name: Verify firewalld Enabled - Enable Service firewalld
+    ansible.builtin.systemd:
       name: firewalld
-      enabled: 'yes'
+      enabled: true
       state: started
-      masked: 'no'
+      masked: false
     when:
     - '"firewalld" in ansible_facts.packages'
   when:
@@ -1941,7 +1973,7 @@
   - restrict_strategy
 
 - name: Find /lib/ file(s) matching ^.*$ recursively
-  command: find -H /lib/  -type f ! -uid 0 -regex "^.*$"
+  command: find -H /lib/  -type f ! -uid 0 -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -1998,7 +2030,7 @@
   - no_reboot_needed | bool
 
 - name: Find /lib64/ file(s) matching ^.*$ recursively
-  command: find -H /lib64/  -type f ! -uid 0 -regex "^.*$"
+  command: find -H /lib64/  -type f ! -uid 0 -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2055,7 +2087,7 @@
   - no_reboot_needed | bool
 
 - name: Find /usr/lib/ file(s) matching ^.*$ recursively
-  command: find -H /usr/lib/  -type f ! -uid 0 -regex "^.*$"
+  command: find -H /usr/lib/  -type f ! -uid 0 -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2112,7 +2144,7 @@
   - no_reboot_needed | bool
 
 - name: Find /usr/lib64/ file(s) matching ^.*$ recursively
-  command: find -H /usr/lib64/  -type f ! -uid 0 -regex "^.*$"
+  command: find -H /usr/lib64/  -type f ! -uid 0 -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2227,7 +2259,7 @@
   - restrict_strategy
 
 - name: Find /lib/ file(s) recursively
-  command: find -H /lib/  -perm /g+w,o+w  -type f -regex "^.*$"
+  command: find -H /lib/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2284,7 +2316,7 @@
   - no_reboot_needed | bool
 
 - name: Find /lib64/ file(s) recursively
-  command: find -H /lib64/  -perm /g+w,o+w  -type f -regex "^.*$"
+  command: find -H /lib64/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2341,7 +2373,7 @@
   - no_reboot_needed | bool
 
 - name: Find /usr/lib/ file(s) recursively
-  command: find -H /usr/lib/  -perm /g+w,o+w  -type f -regex "^.*$"
+  command: find -H /usr/lib/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2398,7 +2430,7 @@
   - no_reboot_needed | bool
 
 - name: Find /usr/lib64/ file(s) recursively
-  command: find -H /usr/lib64/  -perm /g+w,o+w  -type f -regex "^.*$"
+  command: find -H /usr/lib64/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -3746,7 +3778,7 @@
   - no_reboot_needed
   - service_avahi-daemon_disabled
 
-- name: Disable Avahi Server Software - Ensure "avahi-daemon.service" is Masked
+- name: Disable Avahi Server Software - Ensure avahi-daemon.service is Masked
   ansible.builtin.systemd:
     name: avahi-daemon.service
     state: stopped
@@ -3761,7 +3793,7 @@
   - service_avahi_daemon_disabled | bool
   - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "avahi" in ansible_facts.packages
     )
-  - service_exists.stdout_lines is search("avahi-daemon.service",multiline=True)
+  - service_exists.stdout_lines is search("avahi-daemon.service", multiline=True)
   tags:
   - CCE-90824-4
   - NIST-800-53-CM-6(a)
@@ -3803,12 +3835,12 @@
   - no_reboot_needed
   - service_avahi-daemon_disabled
 
-- name: Disable socket avahi-daemon
+- name: Disable Avahi Server Software - Disable Socket avahi-daemon
   ansible.builtin.systemd:
     name: avahi-daemon.socket
-    enabled: 'no'
+    enabled: false
     state: stopped
-    masked: 'yes'
+    masked: true
   when:
   - disable_strategy | bool
   - low_complexity | bool
@@ -3818,7 +3850,7 @@
   - service_avahi_daemon_disabled | bool
   - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "avahi" in ansible_facts.packages
     )
-  - socket_file_exists.stdout_lines is search("avahi-daemon.socket",multiline=True)
+  - socket_file_exists.stdout_lines is search("avahi-daemon.socket", multiline=True)
   tags:
   - CCE-90824-4
   - NIST-800-53-CM-6(a)
@@ -3857,17 +3889,17 @@
   - no_reboot_needed
   - package_fapolicyd_installed
 
-- name: Enable service fapolicyd
+- name: Enable the File Access Policy Service - Enable service fapolicyd
   block:
   - name: Gather the package facts
     package_facts:
       manager: auto
-  - name: Enable service fapolicyd
-    systemd:
+  - name: Enable the File Access Policy Service - Enable Service fapolicyd
+    ansible.builtin.systemd:
       name: fapolicyd
-      enabled: 'yes'
+      enabled: true
       state: started
-      masked: 'no'
+      masked: false
     when:
     - '"fapolicyd" in ansible_facts.packages'
   when:
@@ -4107,7 +4139,7 @@
   - no_reboot_needed
   - service_telnet_disabled
 
-- name: Disable telnet Service - Ensure "telnet.service" is Masked
+- name: Disable telnet Service - Ensure telnet.service is Masked
   ansible.builtin.systemd:
     name: telnet.service
     state: stopped
@@ -4122,7 +4154,7 @@
   - service_telnet_disabled | bool
   - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "telnet-server" in ansible_facts.packages
     )
-  - service_exists.stdout_lines is search("telnet.service",multiline=True)
+  - service_exists.stdout_lines is search("telnet.service", multiline=True)
   tags:
   - CCE-84150-2
   - NIST-800-171-3.1.13
@@ -4168,12 +4200,12 @@
   - no_reboot_needed
   - service_telnet_disabled
 
-- name: Disable socket telnet
+- name: Disable telnet Service - Disable Socket telnet
   ansible.builtin.systemd:
     name: telnet.socket
-    enabled: 'no'
+    enabled: false
     state: stopped
-    masked: 'yes'
+    masked: true
   when:
   - disable_strategy | bool
   - high_severity | bool
@@ -4183,7 +4215,7 @@
   - service_telnet_disabled | bool
   - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "telnet-server" in ansible_facts.packages
     )
-  - socket_file_exists.stdout_lines is search("telnet.socket",multiline=True)
+  - socket_file_exists.stdout_lines is search("telnet.socket", multiline=True)
   tags:
   - CCE-84150-2
   - NIST-800-171-3.1.13
@@ -4262,7 +4294,7 @@
   - service_squid_disabled
   - unknown_severity
 
-- name: Disable Squid - Ensure "squid.service" is Masked
+- name: Disable Squid - Ensure squid.service is Masked
   ansible.builtin.systemd:
     name: squid.service
     state: stopped
@@ -4277,7 +4309,7 @@
   - unknown_severity | bool
   - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "squid" in ansible_facts.packages
     )
-  - service_exists.stdout_lines is search("squid.service",multiline=True)
+  - service_exists.stdout_lines is search("squid.service", multiline=True)
   tags:
   - CCE-84239-3
   - disable_strategy
@@ -4311,12 +4343,12 @@
   - service_squid_disabled
   - unknown_severity
 
-- name: Disable socket squid
+- name: Disable Squid - Disable Socket squid
   ansible.builtin.systemd:
     name: squid.socket
-    enabled: 'no'
+    enabled: false
     state: stopped
-    masked: 'yes'
+    masked: true
   when:
   - disable_strategy | bool
   - low_complexity | bool
@@ -4326,7 +4358,7 @@
   - unknown_severity | bool
   - ( ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"] and "squid" in ansible_facts.packages
     )
-  - socket_file_exists.stdout_lines is search("squid.socket",multiline=True)
+  - socket_file_exists.stdout_lines is search("squid.socket", multiline=True)
   tags:
   - CCE-84239-3
   - disable_strategy
@@ -4953,17 +4985,17 @@
   - no_reboot_needed | bool
   - service_auditd_enabled | bool
 
-- name: Enable service auditd
+- name: Enable auditd Service - Enable service auditd
   block:
   - name: Gather the package facts
     package_facts:
       manager: auto
-  - name: Enable service auditd
-    systemd:
+  - name: Enable auditd Service - Enable Service auditd
+    ansible.builtin.systemd:
       name: auditd
-      enabled: 'yes'
+      enabled: true
       state: started
-      masked: 'no'
+      masked: false
     when:
     - '"audit" in ansible_facts.packages'
   when:
