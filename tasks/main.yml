@@ -40,7 +40,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - package_rsyslog_installed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-84063-7
   - DISA-STIG-RHEL-09-652010
@@ -64,7 +64,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - package_firewalld_installed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-84021-5
   - DISA-STIG-RHEL-09-251010
@@ -90,7 +90,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - package_fapolicyd_installed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-84224-5
   - DISA-STIG-RHEL-09-433010
@@ -186,7 +186,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - package_audit_installed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83649-4
   - DISA-STIG-RHEL-09-653010
@@ -244,7 +244,7 @@
   - no_reboot_needed | bool
   - service_rsyslog_enabled | bool
   - special_service_block | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
 
 - name: Verify firewalld Enabled - Enable service firewalld
   block:
@@ -284,7 +284,7 @@
   - no_reboot_needed | bool
   - service_firewalld_enabled | bool
   - special_service_block | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - '"firewalld" in ansible_facts.packages'
 
 - name: Disable Avahi Server Software - Disable service avahi-daemon
@@ -337,7 +337,7 @@
   - no_reboot_needed | bool
   - service_avahi_daemon_disabled | bool
   - special_service_block | bool
-  - ( "avahi" in ansible_facts.packages and "kernel" in ansible_facts.packages )
+  - ( "avahi" in ansible_facts.packages and "kernel-core" in ansible_facts.packages )
 
 - name: Enable the File Access Policy Service - Enable service fapolicyd
   block:
@@ -370,7 +370,7 @@
   - no_reboot_needed | bool
   - service_fapolicyd_enabled | bool
   - special_service_block | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
 
 - name: Disable Squid - Disable service squid
   block:
@@ -417,7 +417,7 @@
   - service_squid_disabled | bool
   - special_service_block | bool
   - unknown_severity | bool
-  - ( "squid" in ansible_facts.packages and "kernel" in ansible_facts.packages )
+  - ( "squid" in ansible_facts.packages and "kernel-core" in ansible_facts.packages )
 
 - name: Enable auditd Service - Enable service auditd
   block:
@@ -464,7 +464,7 @@
   - no_reboot_needed | bool
   - service_auditd_enabled | bool
   - special_service_block | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - '"audit" in ansible_facts.packages'
 
 - name: Gather the service facts
@@ -482,8 +482,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_hashes | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - ansible_distribution in [ "Fedora", "RedHat", "CentOS", "OracleLinux", "AlmaLinux" ]
   tags:
   - CCE-90841-8
@@ -515,8 +515,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_hashes | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - ansible_distribution == "SLES"
   tags:
   - CCE-90841-8
@@ -552,8 +552,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_hashes | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - (package_manager_reinstall_cmd is defined)
   tags:
   - CCE-90841-8
@@ -589,8 +589,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_hashes | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - files_with_incorrect_hash.stdout_lines is defined
   - (files_with_incorrect_hash.stdout_lines | length > 0)
   tags:
@@ -623,8 +623,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_hashes | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - files_with_incorrect_hash.stdout_lines is defined
   - (package_manager_reinstall_cmd is defined and (files_with_incorrect_hash.stdout_lines | length > 0))
   tags:
@@ -660,8 +660,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_ownership | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   tags:
   - CCE-90842-6
   - CJIS-5.10.4.1
@@ -696,8 +696,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_ownership | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - (files_with_incorrect_ownership.stdout_lines | length > 0)
   tags:
   - CCE-90842-6
@@ -729,8 +729,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_ownership | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - (files_with_incorrect_ownership.stdout_lines | length > 0)
   tags:
   - CCE-90842-6
@@ -766,8 +766,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_permissions | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   tags:
   - CCE-90840-0
   - CJIS-5.10.4.1
@@ -803,8 +803,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_permissions | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - (files_with_incorrect_permissions.stdout_lines | length > 0)
   tags:
   - CCE-90840-0
@@ -837,8 +837,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - rpm_verify_permissions | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline )
   - (files_with_incorrect_permissions.stdout_lines | length > 0)
   tags:
   - CCE-90840-0
@@ -861,12 +861,12 @@
   - restrict_strategy
   - rpm_verify_permissions
 
-- name: Configure System Cryptography Policy
-  ansible.builtin.lineinfile:
-    path: /etc/crypto-policies/config
-    regexp: ^(?!#)(\S+)$
-    line: '{{ var_system_crypto_policy }}'
-    create: true
+- name: Configure System Cryptography Policy - Check current crypto policy (runtime)
+  ansible.builtin.command: /usr/bin/update-crypto-policies --show
+  register: current_crypto_policy
+  changed_when: false
+  failed_when: false
+  check_mode: false
   tags:
   - CCE-83450-7
   - DISA-STIG-RHEL-09-215105
@@ -896,8 +896,13 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Verify that Crypto Policy is Set (runtime)
-  ansible.builtin.command: /usr/bin/update-crypto-policies --set {{ var_system_crypto_policy }}
+- name: Configure System Cryptography Policy - Get mtime of /etc/crypto-policies/config
+  ansible.builtin.stat:
+    path: /etc/crypto-policies/config
+  register: config_file_stat
+  changed_when: false
+  failed_when: false
+  check_mode: false
   tags:
   - CCE-83450-7
   - DISA-STIG-RHEL-09-215105
@@ -926,12 +931,125 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
+
+- name: Configure System Cryptography Policy - Get mtime of /etc/crypto-policies/state/current
+  ansible.builtin.stat:
+    path: /etc/crypto-policies/state/current
+  register: current_file_stat
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  tags:
+  - CCE-83450-7
+  - DISA-STIG-RHEL-09-215105
+  - DISA-STIG-RHEL-09-672030
+  - NIST-800-53-AC-17(2)
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-MA-4(6)
+  - NIST-800-53-SC-12(2)
+  - NIST-800-53-SC-12(3)
+  - NIST-800-53-SC-13
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.7
+  - configure_crypto_policy
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - DISA_STIG_RHEL_09_215105 | bool
+  - DISA_STIG_RHEL_09_672030 | bool
+  - configure_crypto_policy | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Configure System Cryptography Policy - Check existence of /etc/crypto-policies/back-ends/nss.config
+  ansible.builtin.stat:
+    path: /etc/crypto-policies/back-ends/nss.config
+  register: nss_config_stat
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  tags:
+  - CCE-83450-7
+  - DISA-STIG-RHEL-09-215105
+  - DISA-STIG-RHEL-09-672030
+  - NIST-800-53-AC-17(2)
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-MA-4(6)
+  - NIST-800-53-SC-12(2)
+  - NIST-800-53-SC-12(3)
+  - NIST-800-53-SC-13
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.7
+  - configure_crypto_policy
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  when:
+  - DISA_STIG_RHEL_09_215105 | bool
+  - DISA_STIG_RHEL_09_672030 | bool
+  - configure_crypto_policy | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+
+- name: Configure System Cryptography Policy - Verify that Crypto Policy is Set (runtime)
+  ansible.builtin.command: /usr/bin/update-crypto-policies --set {{ var_system_crypto_policy }}
+  when:
+  - DISA_STIG_RHEL_09_215105 | bool
+  - DISA_STIG_RHEL_09_672030 | bool
+  - configure_crypto_policy | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - (current_crypto_policy.stdout.strip() != var_system_crypto_policy) or (config_file_stat.stat.exists and current_file_stat.stat.exists
+    and config_file_stat.stat.mtime > current_file_stat.stat.mtime) or (not nss_config_stat.stat.exists)
+  tags:
+  - CCE-83450-7
+  - DISA-STIG-RHEL-09-215105
+  - DISA-STIG-RHEL-09-672030
+  - NIST-800-53-AC-17(2)
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-MA-4(6)
+  - NIST-800-53-SC-12(2)
+  - NIST-800-53-SC-12(3)
+  - NIST-800-53-SC-13
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.7
+  - configure_crypto_policy
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
 
 - name: Configure SSH to use System Crypto Policy
   ansible.builtin.lineinfile:
     dest: /etc/sysconfig/sshd
     state: absent
     regexp: (?i)^\s*CRYPTO_POLICY.*$
+  when:
+  - configure_ssh_crypto_policy | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83445-7
   - NIST-800-53-AC-17(2)
@@ -948,13 +1066,6 @@
   - medium_disruption
   - medium_severity
   - reboot_required
-  when:
-  - configure_ssh_crypto_policy | bool
-  - disable_strategy | bool
-  - low_complexity | bool
-  - medium_disruption | bool
-  - medium_severity | bool
-  - reboot_required | bool
 
 - name: Find /etc/sudoers.d/ files
   ansible.builtin.find:
@@ -969,7 +1080,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_remove_no_authenticate | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83544-7
   - DISA-STIG-RHEL-09-432025
@@ -999,7 +1110,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_remove_no_authenticate | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83544-7
   - DISA-STIG-RHEL-09-432025
@@ -1025,7 +1136,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_remove_nopasswd | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83536-3
   - DISA-STIG-RHEL-09-611085
@@ -1055,7 +1166,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_remove_nopasswd | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83536-3
   - DISA-STIG-RHEL-09-611085
@@ -1080,7 +1191,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_require_authentication | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83543-9
   - NIST-800-53-CM-6(a)
@@ -1110,7 +1221,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_require_authentication | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83543-9
   - NIST-800-53-CM-6(a)
@@ -1136,7 +1247,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_require_authentication | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83543-9
   - NIST-800-53-CM-6(a)
@@ -1166,7 +1277,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sudo_require_authentication | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83543-9
   - NIST-800-53-CM-6(a)
@@ -1193,8 +1304,9 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - unknown_strategy | bool
-  - not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83461-4
   - NIST-800-53-CM-6(a)
@@ -1551,6 +1663,15 @@
   register: result_authselect_current
   changed_when: false
   failed_when: false
+  when:
+  - DISA_STIG_needed_rules | bool
+  - configure_strategy | bool
+  - enable_authselect | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-89732-2
   - DISA-STIG-needed_rules
@@ -1563,14 +1684,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-  when:
-  - DISA_STIG_needed_rules | bool
-  - configure_strategy | bool
-  - enable_authselect | bool
-  - low_complexity | bool
-  - medium_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
 
 - name: Enable authselect - Try to Select an authselect Profile
   ansible.builtin.command:
@@ -1586,6 +1699,7 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
   - result_authselect_current.rc != 0
   tags:
   - CCE-89732-2
@@ -1614,6 +1728,7 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
   - result_authselect_select is not skipped
   - result_authselect_select.rc != 0
   tags:
@@ -1636,6 +1751,15 @@
     fail_msg:
     - authselect is not used but files from the 'pam' package have been altered, so the authselect configuration won't be
       forced.
+  when:
+  - DISA_STIG_needed_rules | bool
+  - configure_strategy | bool
+  - enable_authselect | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-89732-2
   - DISA-STIG-needed_rules
@@ -1648,14 +1772,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-  when:
-  - DISA_STIG_needed_rules | bool
-  - configure_strategy | bool
-  - enable_authselect | bool
-  - low_complexity | bool
-  - medium_disruption | bool
-  - medium_severity | bool
-  - no_reboot_needed | bool
 
 - name: Enable authselect - Force authselect Profile Selection
   ansible.builtin.command:
@@ -1668,6 +1784,7 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
   - result_authselect_current.rc != 0
   - result_authselect_select.rc != 0
   - result_altered_authselect.rc == 0
@@ -1696,7 +1813,7 @@
   - medium_disruption | bool
   - no_empty_passwords | bool
   - no_reboot_needed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83611-4
   - CJIS-5.5.2
@@ -1766,7 +1883,7 @@
   - medium_disruption | bool
   - no_empty_passwords | bool
   - no_reboot_needed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - result_authselect_present.stat.exists
   tags:
   - CCE-83611-4
@@ -1802,7 +1919,7 @@
   - medium_disruption | bool
   - no_empty_passwords | bool
   - no_reboot_needed | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not result_authselect_present.stat.exists
   tags:
   - CCE-83611-4
@@ -1827,6 +1944,15 @@
   ansible.builtin.getent:
     database: passwd
     split: ':'
+  when:
+  - DISA_STIG_RHEL_09_411100 | bool
+  - accounts_no_uid_except_zero | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83624-7
   - DISA-STIG-RHEL-09-411100
@@ -1844,14 +1970,6 @@
   - low_disruption
   - no_reboot_needed
   - restrict_strategy
-  when:
-  - DISA_STIG_RHEL_09_411100 | bool
-  - accounts_no_uid_except_zero | bool
-  - high_severity | bool
-  - low_complexity | bool
-  - low_disruption | bool
-  - no_reboot_needed | bool
-  - restrict_strategy | bool
 
 - name: Lock the password of the user accounts other than root with uid 0
   ansible.builtin.command: passwd -l {{ item.key }}
@@ -1864,6 +1982,7 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
   - item.value.1  == '0'
   tags:
   - CCE-83624-7
@@ -1915,7 +2034,7 @@
 
 - name: Ensure System is Not Acting as a Network Sniffer - Disable promiscuous mode
   ansible.builtin.command:
-    cmd: ip link set dev {{ item.split(':')[1] }} multicast off promisc off
+    cmd: ip link set dev {{ (item.split(':')[1] | trim).split('@')[0] }} multicast off promisc off
   loop: '{{ network_interfaces.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_251040 | bool
@@ -1926,7 +2045,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman", "container"]
-  - network_interfaces.stdout_lines is defined and "item.split(':') | length == 3"
+  - network_interfaces.stdout_lines is defined and item.split(':') | length >= 3
   tags:
   - CCE-83996-9
   - DISA-STIG-RHEL-09-251040
@@ -2300,8 +2419,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Find /lib/ file(s) matching ^.*$ recursively
-  ansible.builtin.command: find -P /lib/  -type f  ! -user 0 -regextype posix-extended -regex "^.*$"
+- name: Find /lib/ file(s) matching ^.*\.so.*$ recursively
+  ansible.builtin.command: find -P /lib/  -type f  ! -user 0 -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2328,7 +2447,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Ensure owner on /lib/ file(s) matching ^.*$
+- name: Ensure owner on /lib/ file(s) matching ^.*\.so.*$
   ansible.builtin.file:
     path: '{{ item }}'
     follow: false
@@ -2358,8 +2477,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Find /lib64/ file(s) matching ^.*$ recursively
-  ansible.builtin.command: find -P /lib64/  -type f  ! -user 0 -regextype posix-extended -regex "^.*$"
+- name: Find /lib64/ file(s) matching ^.*\.so.*$ recursively
+  ansible.builtin.command: find -P /lib64/  -type f  ! -user 0 -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2386,7 +2505,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Ensure owner on /lib64/ file(s) matching ^.*$
+- name: Ensure owner on /lib64/ file(s) matching ^.*\.so.*$
   ansible.builtin.file:
     path: '{{ item }}'
     follow: false
@@ -2416,8 +2535,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Find /usr/lib/ file(s) matching ^.*$ recursively
-  ansible.builtin.command: find -P /usr/lib/  -type f  ! -user 0 -regextype posix-extended -regex "^.*$"
+- name: Find /usr/lib/ file(s) matching ^.*\.so.*$ recursively
+  ansible.builtin.command: find -P /usr/lib/  -type f  ! -user 0 -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2444,7 +2563,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Ensure owner on /usr/lib/ file(s) matching ^.*$
+- name: Ensure owner on /usr/lib/ file(s) matching ^.*\.so.*$
   ansible.builtin.file:
     path: '{{ item }}'
     follow: false
@@ -2474,8 +2593,8 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Find /usr/lib64/ file(s) matching ^.*$ recursively
-  ansible.builtin.command: find -P /usr/lib64/  -type f  ! -user 0 -regextype posix-extended -regex "^.*$"
+- name: Find /usr/lib64/ file(s) matching ^.*\.so.*$ recursively
+  ansible.builtin.command: find -P /usr/lib64/  -type f  ! -user 0 -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2502,7 +2621,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
-- name: Ensure owner on /usr/lib64/ file(s) matching ^.*$
+- name: Ensure owner on /usr/lib64/ file(s) matching ^.*\.so.*$
   ansible.builtin.file:
     path: '{{ item }}'
     follow: false
@@ -2591,7 +2710,7 @@
   - restrict_strategy
 
 - name: Find /lib/ file(s) recursively
-  ansible.builtin.command: find -P /lib/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
+  ansible.builtin.command: find -P /lib/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2648,7 +2767,7 @@
   - no_reboot_needed | bool
 
 - name: Find /lib64/ file(s) recursively
-  ansible.builtin.command: find -P /lib64/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
+  ansible.builtin.command: find -P /lib64/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2705,7 +2824,7 @@
   - no_reboot_needed | bool
 
 - name: Find /usr/lib/ file(s) recursively
-  ansible.builtin.command: find -P /usr/lib/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
+  ansible.builtin.command: find -P /usr/lib/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2762,7 +2881,7 @@
   - no_reboot_needed | bool
 
 - name: Find /usr/lib64/ file(s) recursively
-  ansible.builtin.command: find -P /usr/lib64/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*$"
+  ansible.builtin.command: find -P /usr/lib64/  -perm /g+w,o+w  -type f -regextype posix-extended -regex "^.*\.so.*$"
   register: files_found
   changed_when: false
   failed_when: false
@@ -2823,6 +2942,7 @@
   register: device_name
   failed_when: device_name.rc > 1
   changed_when: false
+  check_mode: false
   when:
   - DISA_STIG_RHEL_09_231110 | bool
   - configure_strategy | bool
@@ -2831,9 +2951,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nodev | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83881-3
   - DISA-STIG-RHEL-09-231110
@@ -2864,9 +2984,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nodev | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length > 0)
   tags:
@@ -2905,9 +3025,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nodev | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - ("" | length == 0)
   - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length == 0)
@@ -2938,9 +3058,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nodev | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - mount_info is defined and "nodev" not in mount_info.options
   tags:
   - CCE-83881-3
@@ -2973,9 +3093,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nodev | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - mount_info is defined
   - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("" | length == 0)
   tags:
@@ -2999,6 +3119,7 @@
   register: device_name
   failed_when: device_name.rc > 1
   changed_when: false
+  check_mode: false
   when:
   - DISA_STIG_RHEL_09_231115 | bool
   - configure_strategy | bool
@@ -3007,9 +3128,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_noexec | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83857-3
   - DISA-STIG-RHEL-09-231115
@@ -3040,9 +3161,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_noexec | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length > 0)
   tags:
@@ -3081,9 +3202,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_noexec | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - ("" | length == 0)
   - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length == 0)
@@ -3114,9 +3235,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_noexec | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - mount_info is defined and "noexec" not in mount_info.options
   tags:
   - CCE-83857-3
@@ -3149,9 +3270,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_noexec | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - mount_info is defined
   - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("" | length == 0)
   tags:
@@ -3175,6 +3296,7 @@
   register: device_name
   failed_when: device_name.rc > 1
   changed_when: false
+  check_mode: false
   when:
   - DISA_STIG_RHEL_09_231120 | bool
   - configure_strategy | bool
@@ -3183,9 +3305,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nosuid | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83891-2
   - DISA-STIG-RHEL-09-231120
@@ -3216,9 +3338,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nosuid | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length > 0)
   tags:
@@ -3257,9 +3379,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nosuid | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - ("" | length == 0)
   - device_name.stdout is defined and device_name.stdout_lines is defined
   - (device_name.stdout | length == 0)
@@ -3290,9 +3412,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nosuid | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - mount_info is defined and "nosuid" not in mount_info.options
   tags:
   - CCE-83891-2
@@ -3325,9 +3447,9 @@
   - medium_severity | bool
   - mount_option_dev_shm_nosuid | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
-    and not "openshift-kubelet" in ansible_facts.packages ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz",
-    "podman", "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
+    and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
+    in ["docker", "lxc", "openvz", "podman", "container"] ) )
   - mount_info is defined
   - (device_name.stdout is defined and (device_name.stdout | length > 0)) or ("" | length == 0)
   tags:
@@ -3346,16 +3468,12 @@
   - mount_option_dev_shm_nosuid
   - no_reboot_needed
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Restrict Access to Kernel Message Buffer - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*kernel.dmesg_restrict.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_213010 | bool
   - disable_strategy | bool
@@ -3364,7 +3482,7 @@
   - medium_disruption | bool
   - reboot_required | bool
   - sysctl_kernel_dmesg_restrict | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83952-2
   - DISA-STIG-RHEL-09-213010
@@ -3378,12 +3496,70 @@
   - reboot_required
   - sysctl_kernel_dmesg_restrict
 
-- name: Comment out any occurrences of kernel.dmesg_restrict from config files
+- name: Restrict Access to Kernel Message Buffer - Find all files that contain kernel.dmesg_restrict
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.dmesg_restrict\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213010 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - low_severity | bool
+  - medium_disruption | bool
+  - reboot_required | bool
+  - sysctl_kernel_dmesg_restrict | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83952-2
+  - DISA-STIG-RHEL-09-213010
+  - NIST-800-171-3.1.5
+  - NIST-800-53-SI-11(a)
+  - NIST-800-53-SI-11(b)
+  - disable_strategy
+  - low_complexity
+  - low_severity
+  - medium_disruption
+  - reboot_required
+  - sysctl_kernel_dmesg_restrict
+
+- name: Restrict Access to Kernel Message Buffer - Find all files that set kernel.dmesg_restrict to correct value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.dmesg_restrict\s*=\s*1$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213010 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - low_severity | bool
+  - medium_disruption | bool
+  - reboot_required | bool
+  - sysctl_kernel_dmesg_restrict | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83952-2
+  - DISA-STIG-RHEL-09-213010
+  - NIST-800-171-3.1.5
+  - NIST-800-53-SI-11(a)
+  - NIST-800-53-SI-11(b)
+  - disable_strategy
+  - low_complexity
+  - low_severity
+  - medium_disruption
+  - reboot_required
+  - sysctl_kernel_dmesg_restrict
+
+- name: Restrict Access to Kernel Message Buffer - Comment out any occurrences of kernel.dmesg_restrict from config files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*kernel.dmesg_restrict
     replace: '#kernel.dmesg_restrict'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_213010 | bool
   - disable_strategy | bool
@@ -3392,7 +3568,9 @@
   - medium_disruption | bool
   - reboot_required | bool
   - sysctl_kernel_dmesg_restrict | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83952-2
   - DISA-STIG-RHEL-09-213010
@@ -3406,7 +3584,7 @@
   - reboot_required
   - sysctl_kernel_dmesg_restrict
 
-- name: Ensure sysctl kernel.dmesg_restrict is set to 1
+- name: Restrict Access to Kernel Message Buffer - Ensure sysctl kernel.dmesg_restrict is set to 1
   ansible.posix.sysctl:
     name: kernel.dmesg_restrict
     value: '1'
@@ -3421,7 +3599,7 @@
   - medium_disruption | bool
   - reboot_required | bool
   - sysctl_kernel_dmesg_restrict | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83952-2
   - DISA-STIG-RHEL-09-213010
@@ -3435,16 +3613,12 @@
   - reboot_required
   - sysctl_kernel_dmesg_restrict
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Disable Kernel Image Loading - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*kernel.kexec_load_disabled.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_213020 | bool
   - disable_strategy | bool
@@ -3453,7 +3627,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_kexec_load_disabled | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83954-8
   - DISA-STIG-RHEL-09-213020
@@ -3465,12 +3639,66 @@
   - reboot_required
   - sysctl_kernel_kexec_load_disabled
 
-- name: Comment out any occurrences of kernel.kexec_load_disabled from config files
+- name: Disable Kernel Image Loading - Find all files that contain kernel.kexec_load_disabled
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.kexec_load_disabled\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213020 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_kexec_load_disabled | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83954-8
+  - DISA-STIG-RHEL-09-213020
+  - NIST-800-53-CM-6
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_kexec_load_disabled
+
+- name: Disable Kernel Image Loading - Find all files that set kernel.kexec_load_disabled to correct value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.kexec_load_disabled\s*=\s*1$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213020 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_kexec_load_disabled | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83954-8
+  - DISA-STIG-RHEL-09-213020
+  - NIST-800-53-CM-6
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_kexec_load_disabled
+
+- name: Disable Kernel Image Loading - Comment out any occurrences of kernel.kexec_load_disabled from config files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*kernel.kexec_load_disabled
     replace: '#kernel.kexec_load_disabled'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_213020 | bool
   - disable_strategy | bool
@@ -3479,7 +3707,9 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_kexec_load_disabled | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83954-8
   - DISA-STIG-RHEL-09-213020
@@ -3491,7 +3721,7 @@
   - reboot_required
   - sysctl_kernel_kexec_load_disabled
 
-- name: Ensure sysctl kernel.kexec_load_disabled is set to 1
+- name: Disable Kernel Image Loading - Ensure sysctl kernel.kexec_load_disabled is set to 1
   ansible.posix.sysctl:
     name: kernel.kexec_load_disabled
     value: '1'
@@ -3506,7 +3736,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_kexec_load_disabled | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83954-8
   - DISA-STIG-RHEL-09-213020
@@ -3518,16 +3748,12 @@
   - reboot_required
   - sysctl_kernel_kexec_load_disabled
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*kernel.unprivileged_bpf_disabled.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_213075 | bool
   - disable_strategy | bool
@@ -3536,7 +3762,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_unprivileged_bpf_disabled | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83957-1
   - DISA-STIG-RHEL-09-213075
@@ -3549,12 +3775,70 @@
   - reboot_required
   - sysctl_kernel_unprivileged_bpf_disabled
 
-- name: Comment out any occurrences of kernel.unprivileged_bpf_disabled from config files
+- name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Find all files that contain kernel.unprivileged_bpf_disabled
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.unprivileged_bpf_disabled\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213075 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_unprivileged_bpf_disabled | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83957-1
+  - DISA-STIG-RHEL-09-213075
+  - NIST-800-53-AC-6
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_unprivileged_bpf_disabled
+
+- name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Find all files that set kernel.unprivileged_bpf_disabled
+    to correct value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.unprivileged_bpf_disabled\s*=\s*1$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213075 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_unprivileged_bpf_disabled | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83957-1
+  - DISA-STIG-RHEL-09-213075
+  - NIST-800-53-AC-6
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_unprivileged_bpf_disabled
+
+- name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Comment out any occurrences of kernel.unprivileged_bpf_disabled
+    from config files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*kernel.unprivileged_bpf_disabled
     replace: '#kernel.unprivileged_bpf_disabled'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_213075 | bool
   - disable_strategy | bool
@@ -3563,7 +3847,9 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_unprivileged_bpf_disabled | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83957-1
   - DISA-STIG-RHEL-09-213075
@@ -3576,7 +3862,8 @@
   - reboot_required
   - sysctl_kernel_unprivileged_bpf_disabled
 
-- name: Ensure sysctl kernel.unprivileged_bpf_disabled is set to 1
+- name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Ensure sysctl kernel.unprivileged_bpf_disabled
+    is set to 1
   ansible.posix.sysctl:
     name: kernel.unprivileged_bpf_disabled
     value: '1'
@@ -3591,7 +3878,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_unprivileged_bpf_disabled | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83957-1
   - DISA-STIG-RHEL-09-213075
@@ -3604,16 +3891,12 @@
   - reboot_required
   - sysctl_kernel_unprivileged_bpf_disabled
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Restrict usage of ptrace to descendant processes - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*kernel.yama.ptrace_scope.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_213080 | bool
   - disable_strategy | bool
@@ -3622,7 +3905,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_yama_ptrace_scope | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83965-4
   - DISA-STIG-RHEL-09-213080
@@ -3634,12 +3917,67 @@
   - reboot_required
   - sysctl_kernel_yama_ptrace_scope
 
-- name: Comment out any occurrences of kernel.yama.ptrace_scope from config files
+- name: Restrict usage of ptrace to descendant processes - Find all files that contain kernel.yama.ptrace_scope
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.yama.ptrace_scope\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213080 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_yama_ptrace_scope | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83965-4
+  - DISA-STIG-RHEL-09-213080
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_yama_ptrace_scope
+
+- name: Restrict usage of ptrace to descendant processes - Find all files that set kernel.yama.ptrace_scope to correct value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.yama.ptrace_scope\s*=\s*1$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213080 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_yama_ptrace_scope | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83965-4
+  - DISA-STIG-RHEL-09-213080
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_yama_ptrace_scope
+
+- name: Restrict usage of ptrace to descendant processes - Comment out any occurrences of kernel.yama.ptrace_scope from config
+    files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*kernel.yama.ptrace_scope
     replace: '#kernel.yama.ptrace_scope'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_213080 | bool
   - disable_strategy | bool
@@ -3648,7 +3986,9 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_yama_ptrace_scope | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83965-4
   - DISA-STIG-RHEL-09-213080
@@ -3660,7 +4000,7 @@
   - reboot_required
   - sysctl_kernel_yama_ptrace_scope
 
-- name: Ensure sysctl kernel.yama.ptrace_scope is set to 1
+- name: Restrict usage of ptrace to descendant processes - Ensure sysctl kernel.yama.ptrace_scope is set to 1
   ansible.posix.sysctl:
     name: kernel.yama.ptrace_scope
     value: '1'
@@ -3675,7 +4015,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_yama_ptrace_scope | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83965-4
   - DISA-STIG-RHEL-09-213080
@@ -3687,16 +4027,12 @@
   - reboot_required
   - sysctl_kernel_yama_ptrace_scope
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Harden the operation of the BPF just-in-time compiler - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*net.core.bpf_jit_harden.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_251045 | bool
   - disable_strategy | bool
@@ -3705,7 +4041,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_net_core_bpf_jit_harden | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83966-2
   - DISA-STIG-RHEL-09-251045
@@ -3718,12 +4054,70 @@
   - reboot_required
   - sysctl_net_core_bpf_jit_harden
 
-- name: Comment out any occurrences of net.core.bpf_jit_harden from config files
+- name: Harden the operation of the BPF just-in-time compiler - Find all files that contain net.core.bpf_jit_harden
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.core.bpf_jit_harden\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_251045 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_net_core_bpf_jit_harden | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83966-2
+  - DISA-STIG-RHEL-09-251045
+  - NIST-800-53-CM-6
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_net_core_bpf_jit_harden
+
+- name: Harden the operation of the BPF just-in-time compiler - Find all files that set net.core.bpf_jit_harden to correct
+    value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.core.bpf_jit_harden\s*=\s*2$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_251045 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_net_core_bpf_jit_harden | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83966-2
+  - DISA-STIG-RHEL-09-251045
+  - NIST-800-53-CM-6
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_net_core_bpf_jit_harden
+
+- name: Harden the operation of the BPF just-in-time compiler - Comment out any occurrences of net.core.bpf_jit_harden from
+    config files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*net.core.bpf_jit_harden
     replace: '#net.core.bpf_jit_harden'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_251045 | bool
   - disable_strategy | bool
@@ -3732,7 +4126,9 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_net_core_bpf_jit_harden | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83966-2
   - DISA-STIG-RHEL-09-251045
@@ -3745,7 +4141,7 @@
   - reboot_required
   - sysctl_net_core_bpf_jit_harden
 
-- name: Ensure sysctl net.core.bpf_jit_harden is set to 2
+- name: Harden the operation of the BPF just-in-time compiler - Ensure sysctl net.core.bpf_jit_harden is set to 2
   ansible.posix.sysctl:
     name: net.core.bpf_jit_harden
     value: '2'
@@ -3760,7 +4156,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_net_core_bpf_jit_harden | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83966-2
   - DISA-STIG-RHEL-09-251045
@@ -3773,8 +4169,10 @@
   - reboot_required
   - sysctl_net_core_bpf_jit_harden
 
-- name: Update grub defaults and the bootloader menu
-  ansible.builtin.command: /sbin/grubby --update-kernel=ALL --remove-args="noexec"
+- name: Check if noexec argument is already present in /etc/default/grub
+  ansible.builtin.slurp:
+    src: /etc/default/grub
+  register: etc_default_grub
   when:
   - DISA_STIG_RHEL_09_213110 | bool
   - low_complexity | bool
@@ -3783,7 +4181,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - sysctl_kernel_exec_shield | bool
-  - '"kernel" in ansible_facts.packages'
+  - ( "kernel-core" in ansible_facts.packages and ansible_architecture == "x86_64" )
   tags:
   - CCE-83970-4
   - DISA-STIG-RHEL-09-213110
@@ -3797,16 +4195,65 @@
   - restrict_strategy
   - sysctl_kernel_exec_shield
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Check if noexec argument is present
+  ansible.builtin.command: /sbin/grubby --info=ALL
+  register: grubby_info
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213110 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - restrict_strategy | bool
+  - sysctl_kernel_exec_shield | bool
+  - ( "kernel-core" in ansible_facts.packages and ansible_architecture == "x86_64" )
+  tags:
+  - CCE-83970-4
+  - DISA-STIG-RHEL-09-213110
+  - NIST-800-171-3.1.7
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-39
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - reboot_required
+  - restrict_strategy
+  - sysctl_kernel_exec_shield
+
+- name: Update grub defaults and the bootloader menu
+  ansible.builtin.command: /sbin/grubby --update-kernel=ALL --remove-args="noexec"
+  when:
+  - DISA_STIG_RHEL_09_213110 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - restrict_strategy | bool
+  - sysctl_kernel_exec_shield | bool
+  - ( "kernel-core" in ansible_facts.packages and ansible_architecture == "x86_64" )
+  - (grubby_info.stdout is search('noexec')) or ((etc_default_grub['content'] | b64decode) is search('noexec'))
+  tags:
+  - CCE-83970-4
+  - DISA-STIG-RHEL-09-213110
+  - NIST-800-171-3.1.7
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-39
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - reboot_required
+  - restrict_strategy
+  - sysctl_kernel_exec_shield
+
+- name: Restrict Exposed Kernel Pointer Addresses Access - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*kernel.kptr_restrict.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_213025 | bool
   - disable_strategy | bool
@@ -3815,7 +4262,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_kptr_restrict | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83972-0
   - DISA-STIG-RHEL-09-213025
@@ -3830,12 +4277,74 @@
   - reboot_required
   - sysctl_kernel_kptr_restrict
 
-- name: Comment out any occurrences of kernel.kptr_restrict from config files
+- name: Restrict Exposed Kernel Pointer Addresses Access - Find all files that contain kernel.kptr_restrict
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.kptr_restrict\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213025 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_kptr_restrict | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83972-0
+  - DISA-STIG-RHEL-09-213025
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-30
+  - NIST-800-53-SC-30(2)
+  - NIST-800-53-SC-30(5)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_kptr_restrict
+
+- name: Restrict Exposed Kernel Pointer Addresses Access - Find all files that set kernel.kptr_restrict to correct value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.kptr_restrict\s*=\s*{{
+      sysctl_kernel_kptr_restrict_value }}$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213025 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_kptr_restrict | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83972-0
+  - DISA-STIG-RHEL-09-213025
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-30
+  - NIST-800-53-SC-30(2)
+  - NIST-800-53-SC-30(5)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_kptr_restrict
+
+- name: Restrict Exposed Kernel Pointer Addresses Access - Comment out any occurrences of kernel.kptr_restrict from config
+    files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*kernel.kptr_restrict
     replace: '#kernel.kptr_restrict'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_213025 | bool
   - disable_strategy | bool
@@ -3844,7 +4353,9 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_kptr_restrict | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83972-0
   - DISA-STIG-RHEL-09-213025
@@ -3859,7 +4370,7 @@
   - reboot_required
   - sysctl_kernel_kptr_restrict
 
-- name: Ensure sysctl kernel.kptr_restrict is set
+- name: Restrict Exposed Kernel Pointer Addresses Access - Ensure sysctl kernel.kptr_restrict is set
   ansible.posix.sysctl:
     name: kernel.kptr_restrict
     value: '{{ sysctl_kernel_kptr_restrict_value }}'
@@ -3874,7 +4385,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_kptr_restrict | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83972-0
   - DISA-STIG-RHEL-09-213025
@@ -3889,16 +4400,12 @@
   - reboot_required
   - sysctl_kernel_kptr_restrict
 
-- name: List /etc/sysctl.d/*.conf files
-  ansible.builtin.find:
-    paths:
+- name: Enable Randomized Layout of Virtual Address Space - Set fact for sysctl paths
+  ansible.builtin.set_fact:
+    sysctl_paths:
     - /etc/sysctl.d/
     - /run/sysctl.d/
     - /usr/local/lib/sysctl.d/
-    contains: ^[\s]*kernel.randomize_va_space.*$
-    patterns: '*.conf'
-    file_type: any
-  register: find_sysctl_d
   when:
   - DISA_STIG_RHEL_09_213070 | bool
   - disable_strategy | bool
@@ -3907,7 +4414,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_randomize_va_space | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83971-2
   - DISA-STIG-RHEL-09-213070
@@ -3926,12 +4433,81 @@
   - reboot_required
   - sysctl_kernel_randomize_va_space
 
-- name: Comment out any occurrences of kernel.randomize_va_space from config files
+- name: Enable Randomized Layout of Virtual Address Space - Find all files that contain kernel.randomize_va_space
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.randomize_va_space\s*=\s*.*$'
+  register: find_all_values
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213070 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_randomize_va_space | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83971-2
+  - DISA-STIG-RHEL-09-213070
+  - NIST-800-171-3.1.7
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-30
+  - NIST-800-53-SC-30(2)
+  - PCI-DSS-Req-2.2.1
+  - PCI-DSSv4-3.3
+  - PCI-DSSv4-3.3.1
+  - PCI-DSSv4-3.3.1.1
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_randomize_va_space
+
+- name: Enable Randomized Layout of Virtual Address Space - Find all files that set kernel.randomize_va_space to correct value
+  ansible.builtin.shell:
+    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.randomize_va_space\s*=\s*2$'
+  register: find_correct_value
+  check_mode: false
+  changed_when: false
+  failed_when: false
+  when:
+  - DISA_STIG_RHEL_09_213070 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_randomize_va_space | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83971-2
+  - DISA-STIG-RHEL-09-213070
+  - NIST-800-171-3.1.7
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-30
+  - NIST-800-53-SC-30(2)
+  - PCI-DSS-Req-2.2.1
+  - PCI-DSSv4-3.3
+  - PCI-DSSv4-3.3.1
+  - PCI-DSSv4-3.3.1.1
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_randomize_va_space
+
+- name: Enable Randomized Layout of Virtual Address Space - Comment out any occurrences of kernel.randomize_va_space from
+    config files
   ansible.builtin.replace:
-    path: '{{ item.path }}'
+    path: '{{ item | split(":") | first }}'
     regexp: ^[\s]*kernel.randomize_va_space
     replace: '#kernel.randomize_va_space'
-  loop: '{{ find_sysctl_d.files }}'
+  loop: '{{ find_all_values.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_09_213070 | bool
   - disable_strategy | bool
@@ -3940,7 +4516,9 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_randomize_va_space | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - find_correct_value.stdout_lines | length == 0 or find_all_values.stdout_lines | length > find_correct_value.stdout_lines
+    | length
   tags:
   - CCE-83971-2
   - DISA-STIG-RHEL-09-213070
@@ -3959,7 +4537,7 @@
   - reboot_required
   - sysctl_kernel_randomize_va_space
 
-- name: Ensure sysctl kernel.randomize_va_space is set to 2
+- name: Enable Randomized Layout of Virtual Address Space - Ensure sysctl kernel.randomize_va_space is set to 2
   ansible.posix.sysctl:
     name: kernel.randomize_va_space
     value: '2'
@@ -3974,7 +4552,7 @@
   - medium_severity | bool
   - reboot_required | bool
   - sysctl_kernel_randomize_va_space | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83971-2
   - DISA-STIG-RHEL-09-213070
@@ -4026,7 +4604,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - selinux_policytype | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-84074-4
   - DISA-STIG-RHEL-09-431015
@@ -4044,6 +4622,39 @@
   - medium_severity
   - no_reboot_needed
   - selinux_policytype
+
+- name: Ensure SELinux State is Enforcing - Check current SELinux state
+  ansible.builtin.command:
+    cmd: getenforce
+  register: selinux_state
+  check_mode: false
+  changed_when: false
+  when:
+  - DISA_STIG_RHEL_09_431010 | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - selinux_state | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-84079-3
+  - DISA-STIG-RHEL-09-431010
+  - NIST-800-171-3.1.2
+  - NIST-800-171-3.7.2
+  - NIST-800-53-AC-3
+  - NIST-800-53-AC-3(3)(a)
+  - NIST-800-53-AU-9
+  - NIST-800-53-SC-7(21)
+  - PCI-DSSv4-1.2
+  - PCI-DSSv4-1.2.6
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  - selinux_state
 
 - name: Ensure SELinux State is Enforcing
   block:
@@ -4078,7 +4689,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - selinux_state | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-84079-3
   - DISA-STIG-RHEL-09-431010
@@ -4097,10 +4708,12 @@
   - restrict_strategy
   - selinux_state
 
-- name: ' - Mark system to relabel SELinux on next boot'
+- name: Ensure SELinux State is Enforcing - Mark system to relabel SELinux on next boot
   ansible.builtin.file:
     path: /.autorelabel
     state: touch
+    access_time: preserve
+    modification_time: preserve
   when:
   - DISA_STIG_RHEL_09_431010 | bool
   - high_severity | bool
@@ -4109,7 +4722,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - selinux_state | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - selinux_state.stdout | lower != var_selinux_state
   tags:
   - CCE-84079-3
   - DISA-STIG-RHEL-09-431010
@@ -4133,6 +4747,7 @@
     cmd: systemctl -q list-unit-files --type socket
   register: result_systemd_unit_files
   changed_when: false
+  check_mode: false
   when:
   - disable_strategy | bool
   - high_severity | bool
@@ -4140,7 +4755,7 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - service_telnet_disabled | bool
-  - ( "telnet-server" in ansible_facts.packages and "kernel" in ansible_facts.packages )
+  - ( "telnet-server" in ansible_facts.packages and "kernel-core" in ansible_facts.packages )
   tags:
   - CCE-84150-2
   - NIST-800-171-3.1.13
@@ -4169,7 +4784,7 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - service_telnet_disabled | bool
-  - ( "telnet-server" in ansible_facts.packages and "kernel" in ansible_facts.packages )
+  - ( "telnet-server" in ansible_facts.packages and "kernel-core" in ansible_facts.packages )
   - result_systemd_unit_files.stdout_lines is search("telnet.socket")
   tags:
   - CCE-84150-2
@@ -4185,6 +4800,78 @@
   - low_disruption
   - no_reboot_needed
   - service_telnet_disabled
+
+- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255040 | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_empty_passwords | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90799-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255040
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_empty_passwords
+
+- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+no$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255040 | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_empty_passwords | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90799-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255040
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_empty_passwords
 
 - name: Disable SSH Access via Empty Passwords
   block:
@@ -4231,7 +4918,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_empty_passwords | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90799-8
   - CJIS-5.5.6
@@ -4257,6 +4945,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255040 | bool
   - high_severity | bool
@@ -4265,7 +4955,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_empty_passwords | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90799-8
   - CJIS-5.5.6
@@ -4285,6 +4975,68 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_disable_empty_passwords
+
+- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255135 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_gssapi_auth | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90808-7
+  - DISA-STIG-RHEL-09-255135
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_gssapi_auth
+
+- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+no$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255135 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_gssapi_auth | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90808-7
+  - DISA-STIG-RHEL-09-255135
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_gssapi_auth
 
 - name: Disable GSSAPI Authentication
   block:
@@ -4331,7 +5083,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_gssapi_auth | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90808-7
   - DISA-STIG-RHEL-09-255135
@@ -4352,6 +5105,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255135 | bool
   - low_complexity | bool
@@ -4360,7 +5115,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_gssapi_auth | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90808-7
   - DISA-STIG-RHEL-09-255135
@@ -4375,6 +5130,74 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_disable_gssapi_auth
+
+- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255145 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_rhosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90797-2
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255145
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_rhosts
+
+- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+yes$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255145 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_rhosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90797-2
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255145
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_rhosts
 
 - name: Disable SSH Support for .rhosts Files
   block:
@@ -4421,7 +5244,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_rhosts | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90797-2
   - CJIS-5.5.6
@@ -4445,6 +5269,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255145 | bool
   - low_complexity | bool
@@ -4453,7 +5279,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_rhosts | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90797-2
   - CJIS-5.5.6
@@ -4471,6 +5297,84 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_disable_rhosts
+
+- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255045 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_root_login | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90800-4
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255045
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6(2)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - NIST-800-53-IA-2
+  - NIST-800-53-IA-2(5)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_root_login
+
+- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+no$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255045 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_root_login | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90800-4
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255045
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6(2)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - NIST-800-53-IA-2
+  - NIST-800-53-IA-2(5)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_root_login
 
 - name: Disable SSH Root Login
   block:
@@ -4517,7 +5421,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_root_login | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90800-4
   - CJIS-5.5.6
@@ -4546,6 +5451,8 @@
     path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255045 | bool
   - low_complexity | bool
@@ -4554,7 +5461,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_root_login | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90800-4
   - CJIS-5.5.6
@@ -4577,6 +5484,68 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_disable_root_login
+
+- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255150 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_user_known_hosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90796-4
+  - DISA-STIG-RHEL-09-255150
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_user_known_hosts
+
+- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+yes$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255150 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_user_known_hosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90796-4
+  - DISA-STIG-RHEL-09-255150
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_user_known_hosts
 
 - name: Disable SSH Support for User Known Hosts
   block:
@@ -4623,7 +5592,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_user_known_hosts | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90796-4
   - DISA-STIG-RHEL-09-255150
@@ -4644,6 +5614,8 @@
     path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255150 | bool
   - low_complexity | bool
@@ -4652,7 +5624,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_disable_user_known_hosts | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90796-4
   - DISA-STIG-RHEL-09-255150
@@ -4667,6 +5639,76 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_disable_user_known_hosts
+
+- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255085 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_do_not_permit_user_env | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90803-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255085
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_do_not_permit_user_env
+
+- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+no$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255085 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_do_not_permit_user_env | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90803-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255085
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_do_not_permit_user_env
 
 - name: Do Not Allow SSH Environment Options
   block:
@@ -4713,7 +5755,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_do_not_permit_user_env | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90803-8
   - CJIS-5.5.6
@@ -4738,6 +5781,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255085 | bool
   - low_complexity | bool
@@ -4746,7 +5791,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_do_not_permit_user_env | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90803-8
   - CJIS-5.5.6
@@ -4765,6 +5810,66 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_do_not_permit_user_env
+
+- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255160 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_enable_strictmodes | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90809-5
+  - DISA-STIG-RHEL-09-255160
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_enable_strictmodes
+
+- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+yes$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255160 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_enable_strictmodes | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90809-5
+  - DISA-STIG-RHEL-09-255160
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_enable_strictmodes
 
 - name: Enable Use of Strict Mode Checking
   block:
@@ -4811,7 +5916,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_enable_strictmodes | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90809-5
   - DISA-STIG-RHEL-09-255160
@@ -4831,6 +5937,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255160 | bool
   - low_complexity | bool
@@ -4839,7 +5947,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_enable_strictmodes | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90809-5
   - DISA-STIG-RHEL-09-255160
@@ -4853,6 +5961,62 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_enable_strictmodes
+
+- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255165 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_print_last_log | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90804-6
+  - DISA-STIG-RHEL-09-255165
+  - NIST-800-53-AC-9
+  - NIST-800-53-AC-9(1)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_print_last_log
+
+- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+yes$
+  register: _sshd_config_correctly
+  when:
+  - DISA_STIG_RHEL_09_255165 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_print_last_log | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90804-6
+  - DISA-STIG-RHEL-09-255165
+  - NIST-800-53-AC-9
+  - NIST-800-53-AC-9(1)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_print_last_log
 
 - name: Enable SSH Print Last Log
   block:
@@ -4899,7 +6063,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_print_last_log | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90804-6
   - DISA-STIG-RHEL-09-255165
@@ -4917,6 +6082,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - DISA_STIG_RHEL_09_255165 | bool
   - low_complexity | bool
@@ -4925,7 +6092,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_print_last_log | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90804-6
   - DISA-STIG-RHEL-09-255165
@@ -4937,6 +6104,58 @@
   - no_reboot_needed
   - restrict_strategy
   - sshd_print_last_log
+
+- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+
+  register: _sshd_config_has_parameter
+  when:
+  - low_complexity | bool
+  - low_disruption | bool
+  - low_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_set_loglevel_info | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90813-7
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - low_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_set_loglevel_info
+
+- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured correctly
+  ansible.builtin.find:
+    paths:
+    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+INFO$
+  register: _sshd_config_correctly
+  when:
+  - low_complexity | bool
+  - low_disruption | bool
+  - low_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_set_loglevel_info | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90813-7
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - low_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_set_loglevel_info
 
 - name: Set LogLevel to INFO
   block:
@@ -4982,7 +6201,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_set_loglevel_info | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
+  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
   tags:
   - CCE-90813-7
   - NIST-800-53-AC-17(a)
@@ -4999,6 +6219,8 @@
     path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     mode: '0600'
     state: touch
+    modification_time: preserve
+    access_time: preserve
   when:
   - low_complexity | bool
   - low_disruption | bool
@@ -5006,7 +6228,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - sshd_set_loglevel_info | bool
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-90813-7
   - NIST-800-53-AC-17(a)
@@ -5029,7 +6251,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -5158,7 +6380,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -5285,7 +6507,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - audit_arch == "b64"
   tags:
   - CCE-83706-2
@@ -5320,7 +6542,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -5354,7 +6576,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -5387,7 +6609,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -5420,7 +6642,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -5455,7 +6677,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -5490,7 +6712,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -5524,7 +6746,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83706-2
@@ -5559,7 +6781,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -5593,7 +6815,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -5626,7 +6848,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -5659,7 +6881,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -5694,7 +6916,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -5729,7 +6951,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -5763,7 +6985,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83706-2
@@ -5798,7 +7020,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -5832,7 +7054,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -5865,7 +7087,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -5898,7 +7120,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -5933,7 +7155,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -5968,7 +7190,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -6002,7 +7224,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83706-2
@@ -6037,7 +7259,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -6071,7 +7293,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -6104,7 +7326,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6137,7 +7359,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6172,7 +7394,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83706-2
@@ -6207,7 +7429,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83706-2
   - CJIS-5.4.1.1
@@ -6241,7 +7463,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83706-2
@@ -6275,7 +7497,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83729-4
   - CJIS-5.4.1.1
@@ -6312,7 +7534,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83729-4
@@ -6349,7 +7571,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83729-4
   - CJIS-5.4.1.1
@@ -6386,7 +7608,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83729-4
@@ -6422,7 +7644,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6458,7 +7680,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6496,7 +7718,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83729-4
@@ -6533,7 +7755,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83729-4
   - CJIS-5.4.1.1
@@ -6570,7 +7792,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83729-4
@@ -6607,7 +7829,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83729-4
   - CJIS-5.4.1.1
@@ -6644,7 +7866,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83729-4
@@ -6680,7 +7902,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6716,7 +7938,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6754,7 +7976,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83729-4
@@ -6793,7 +8015,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83722-9
   - CJIS-5.4.1.1
@@ -6831,7 +8053,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83722-9
@@ -6868,7 +8090,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6905,7 +8127,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -6944,7 +8166,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83722-9
@@ -6983,7 +8205,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83722-9
   - CJIS-5.4.1.1
@@ -7021,7 +8243,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83722-9
@@ -7060,7 +8282,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83723-7
   - CJIS-5.4.1.1
@@ -7098,7 +8320,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83723-7
@@ -7135,7 +8357,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7172,7 +8394,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7211,7 +8433,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83723-7
@@ -7250,7 +8472,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83723-7
   - CJIS-5.4.1.1
@@ -7288,7 +8510,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83723-7
@@ -7327,7 +8549,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83712-0
   - CJIS-5.4.1.1
@@ -7365,7 +8587,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83712-0
@@ -7402,7 +8624,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7440,7 +8662,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7480,7 +8702,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83712-0
@@ -7519,7 +8741,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83712-0
   - CJIS-5.4.1.1
@@ -7558,7 +8780,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83712-0
@@ -7597,7 +8819,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83714-6
   - CJIS-5.4.1.1
@@ -7635,7 +8857,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83714-6
@@ -7672,7 +8894,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7709,7 +8931,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7748,7 +8970,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83714-6
@@ -7787,7 +9009,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83714-6
   - CJIS-5.4.1.1
@@ -7825,7 +9047,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83714-6
@@ -7864,7 +9086,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83725-2
   - CJIS-5.4.1.1
@@ -7902,7 +9124,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83725-2
@@ -7939,7 +9161,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -7976,7 +9198,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -8015,7 +9237,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83725-2
@@ -8054,7 +9276,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83725-2
   - CJIS-5.4.1.1
@@ -8092,7 +9314,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83725-2
@@ -8127,7 +9349,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not ( ansible_architecture == "aarch64" )
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
@@ -8258,7 +9480,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not ( ansible_architecture == "aarch64" )
   tags:
   - CCE-83830-0
@@ -8387,7 +9609,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not ( ansible_architecture == "aarch64" )
   - audit_arch == "b64"
   tags:
@@ -8420,7 +9642,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not ( ansible_architecture == "aarch64" )
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
@@ -8553,7 +9775,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not ( ansible_architecture == "aarch64" )
   tags:
   - CCE-83812-8
@@ -8684,7 +9906,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - not ( ansible_architecture == "aarch64" )
   - audit_arch == "b64"
   tags:
@@ -8808,7 +10030,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83748-4
   - DISA-STIG-RHEL-09-654045
@@ -8928,7 +10150,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83749-2
   - NIST-800-171-3.1.7
@@ -9048,7 +10270,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83750-0
   - DISA-STIG-RHEL-09-654050
@@ -9170,7 +10392,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83736-9
   - DISA-STIG-RHEL-09-654055
@@ -9290,7 +10512,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83751-8
   - DISA-STIG-RHEL-09-654060
@@ -9410,7 +10632,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83746-8
   - NIST-800-53-AC-6(9)
@@ -9435,7 +10657,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -9566,7 +10788,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83804-5
   - CJIS-5.4.1.1
@@ -9695,7 +10917,7 @@
   - reboot_required | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - audit_arch == "b64"
   tags:
   - CCE-83804-5
@@ -9729,7 +10951,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83783-1
   - DISA-STIG-RHEL-09-654250
@@ -9765,7 +10987,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83783-1
@@ -9800,7 +11022,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -9835,7 +11057,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -9873,7 +11095,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83783-1
@@ -9910,7 +11132,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83783-1
   - DISA-STIG-RHEL-09-654250
@@ -9947,7 +11169,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83783-1
@@ -9984,7 +11206,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83785-6
   - DISA-STIG-RHEL-09-654255
@@ -10020,7 +11242,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83785-6
@@ -10055,7 +11277,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -10090,7 +11312,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -10127,7 +11349,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83785-6
@@ -10164,7 +11386,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83785-6
   - DISA-STIG-RHEL-09-654255
@@ -10200,7 +11422,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83785-6
@@ -10237,7 +11459,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83782-3
   - DISA-STIG-RHEL-09-654260
@@ -10273,7 +11495,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83782-3
@@ -10308,7 +11530,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -10343,7 +11565,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -10380,7 +11602,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83782-3
@@ -10417,7 +11639,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83782-3
   - DISA-STIG-RHEL-09-654260
@@ -10453,7 +11675,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83782-3
@@ -10485,7 +11707,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -10614,7 +11836,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83840-9
   - CJIS-5.4.1.1
@@ -10740,7 +11962,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - audit_arch == "b64"
   tags:
   - CCE-83840-9
@@ -10771,7 +11993,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -10894,7 +12116,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83837-5
   - CJIS-5.4.1.1
@@ -11015,7 +12237,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - audit_arch == "b64"
   tags:
   - CCE-83837-5
@@ -11046,7 +12268,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - ansible_architecture == "aarch64" or ansible_architecture == "ppc64" or ansible_architecture == "ppc64le" or ansible_architecture
     == "s390x" or ansible_architecture == "x86_64"
   tags:
@@ -11175,7 +12397,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83836-7
   - CJIS-5.4.1.1
@@ -11302,7 +12524,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - audit_arch == "b64"
   tags:
   - CCE-83836-7
@@ -11430,7 +12652,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - ( not ( ansible_architecture == "aarch64" ) and not ( ansible_architecture == "s390x" ) )
   tags:
   - CCE-83835-9
@@ -11464,7 +12686,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83839-1
   - CJIS-5.4.1.1
@@ -11497,7 +12719,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83839-1
@@ -11530,7 +12752,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched == 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -11563,7 +12785,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_watch_key.matched is defined and find_watch_key.matched > 0 and find_existing_watch_rules_d.matched is defined and
     find_existing_watch_rules_d.matched == 0
   tags:
@@ -11598,7 +12820,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83839-1
@@ -11632,7 +12854,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83839-1
   - CJIS-5.4.1.1
@@ -11666,7 +12888,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83839-1
@@ -11701,7 +12923,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83685-8
   - NIST-800-171-3.3.1
@@ -11748,7 +12970,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83704-7
   - DISA-STIG-RHEL-09-653095
@@ -11794,7 +13016,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83682-5
   - DISA-STIG-RHEL-09-653075
@@ -11840,7 +13062,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83696-5
   - DISA-STIG-RHEL-09-653100
@@ -11864,7 +13086,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83686-6
   - DISA-STIG-RHEL-09-653060
@@ -11913,7 +13135,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83686-6
   - DISA-STIG-RHEL-09-653060
@@ -11962,7 +13184,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
   - '"audit" in ansible_facts.packages'
-  - '"kernel" in ansible_facts.packages'
+  - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83705-4
   - DISA-STIG-RHEL-09-653105
