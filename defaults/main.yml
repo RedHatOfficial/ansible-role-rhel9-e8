@@ -72,7 +72,6 @@ DISA_STIG_RHEL_09_654240: true
 DISA_STIG_RHEL_09_654245: true
 DISA_STIG_RHEL_09_654250: true
 DISA_STIG_RHEL_09_654255: true
-DISA_STIG_RHEL_09_654260: true
 DISA_STIG_RHEL_09_672030: true
 DISA_STIG_needed_rules: true
 accounts_no_uid_except_zero: true
@@ -107,7 +106,6 @@ auditd_log_format: true
 auditd_name_format: true
 auditd_write_logs: true
 configure_crypto_policy: true
-configure_ssh_crypto_policy: true
 configure_strategy: true
 dir_perms_world_writable_sticky_bits: true
 disable_strategy: true
