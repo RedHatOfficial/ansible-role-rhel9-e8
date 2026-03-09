@@ -1037,36 +1037,6 @@
   - no_reboot_needed
   - restrict_strategy
 
-- name: Configure SSH to use System Crypto Policy
-  ansible.builtin.lineinfile:
-    dest: /etc/sysconfig/sshd
-    state: absent
-    regexp: (?i)^\s*CRYPTO_POLICY.*$
-  when:
-  - configure_ssh_crypto_policy | bool
-  - disable_strategy | bool
-  - low_complexity | bool
-  - medium_disruption | bool
-  - medium_severity | bool
-  - reboot_required | bool
-  - '"kernel-core" in ansible_facts.packages'
-  tags:
-  - CCE-83445-7
-  - NIST-800-53-AC-17(2)
-  - NIST-800-53-AC-17(a)
-  - NIST-800-53-CM-6(a)
-  - NIST-800-53-MA-4(6)
-  - NIST-800-53-SC-13
-  - PCI-DSS-Req-2.2
-  - PCI-DSSv4-2.2
-  - PCI-DSSv4-2.2.7
-  - configure_ssh_crypto_policy
-  - disable_strategy
-  - low_complexity
-  - medium_disruption
-  - medium_severity
-  - reboot_required
-
 - name: Find /etc/sudoers.d/ files
   ansible.builtin.find:
     paths:
@@ -1488,7 +1458,7 @@
   - medium_disruption
   - no_reboot_needed
 
-- name: Read permission of GPG key directory
+- name: 'Ensure Red Hat GPG Key Installed: Read permission of GPG key directory'
   ansible.builtin.stat:
     path: /etc/pki/rpm-gpg/
   register: gpg_key_directory_permission
@@ -1521,7 +1491,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Read signatures in GPG key
+- name: 'Ensure Red Hat GPG Key Installed: Read signatures in GPG key'
   ansible.builtin.command: gpg --show-keys --with-fingerprint --with-colons "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
   changed_when: false
   register: gpg_fingerprints
@@ -1555,11 +1525,10 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Set Fact - Installed GPG Fingerprints
+- name: 'Ensure Red Hat GPG Key Installed: Set Fact - Installed GPG Fingerprints'
   ansible.builtin.set_fact:
-    gpg_installed_fingerprints: '{{ gpg_fingerprints.stdout | regex_findall(''^pub.*
-
-      (?:^fpr[:]*)([0-9A-Fa-f]*)'', ''\1'') | list }}'
+    gpg_installed_fingerprints: '{{ gpg_fingerprints.stdout | regex_findall(''^pub.*\n(?:^fpr[:]*)([0-9A-Fa-f]*)'', ''\1'')
+      | list }}'
   tags:
   - CCE-84180-9
   - CJIS-5.10.4.1
@@ -1588,7 +1557,7 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Set Fact - Valid fingerprints
+- name: 'Ensure Red Hat GPG Key Installed: Set Fact - Valid fingerprints'
   ansible.builtin.set_fact:
     gpg_valid_fingerprints:
     - 567E347AD0044ADE55BA8A5F199E2F91FD431D51
@@ -1621,10 +1590,8 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 
-- name: Import RedHat GPG key
-  ansible.builtin.rpm_key:
-    state: present
-    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+- name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
+  ansible.builtin.command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
   when:
   - DISA_STIG_RHEL_09_214010 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -2938,7 +2905,7 @@
   - no_reboot_needed | bool
 
 - name: 'Add nodev Option to /dev/shm: Check information associated to mountpoint'
-  command: findmnt  '/dev/shm'
+  ansible.builtin.command: findmnt  '/dev/shm'
   register: device_name
   failed_when: device_name.rc > 1
   changed_when: false
@@ -2974,7 +2941,7 @@
   set_fact:
     mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
   with_together:
-  - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+  - '{{ device_name.stdout_lines[0].split() | map(''lower'') | list }}'
   - '{{ device_name.stdout_lines[1].split() | list }}'
   when:
   - DISA_STIG_RHEL_09_231110 | bool
@@ -3049,7 +3016,8 @@
 
 - name: 'Add nodev Option to /dev/shm: Make sure nodev option is part of the to /dev/shm options'
   set_fact:
-    mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nodev'' }) }}'
+    mount_info: '{{ mount_info | combine( {''options'':''''~(mount_info.options | default(''''))~('','' if (mount_info.options
+      | default('''')) else '''')~''nodev'' }) }}'
   when:
   - DISA_STIG_RHEL_09_231110 | bool
   - configure_strategy | bool
@@ -3061,7 +3029,7 @@
   - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
     and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
     in ["docker", "lxc", "openvz", "podman", "container"] ) )
-  - mount_info is defined and "nodev" not in mount_info.options
+  - mount_info is defined and "nodev" not in (mount_info.options | default(''))
   tags:
   - CCE-83881-3
   - DISA-STIG-RHEL-09-231110
@@ -3079,12 +3047,17 @@
   - no_reboot_needed
 
 - name: 'Add nodev Option to /dev/shm: Ensure /dev/shm is mounted with nodev option'
-  mount:
+  ansible.posix.mount:
     path: /dev/shm
-    src: '{{ mount_info.source }}'
-    opts: '{{ mount_info.options }}'
+    src: '{{ mount_info.source | default('''') }}'
+    opts: '{{ mount_info.options | default('''') }}'
     state: mounted
-    fstype: '{{ mount_info.fstype }}'
+    fstype: '{{ mount_info.fstype | default('''') }}'
+  register: mount_result
+  failed_when:
+  - mount_result is failed
+  - '''target is busy'' not in (mount_result.msg | default(''''))'
+  - '''already mounted'' not in (mount_result.msg | default(''''))'
   when:
   - DISA_STIG_RHEL_09_231110 | bool
   - configure_strategy | bool
@@ -3115,7 +3088,7 @@
   - no_reboot_needed
 
 - name: 'Add noexec Option to /dev/shm: Check information associated to mountpoint'
-  command: findmnt  '/dev/shm'
+  ansible.builtin.command: findmnt  '/dev/shm'
   register: device_name
   failed_when: device_name.rc > 1
   changed_when: false
@@ -3151,7 +3124,7 @@
   set_fact:
     mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
   with_together:
-  - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+  - '{{ device_name.stdout_lines[0].split() | map(''lower'') | list }}'
   - '{{ device_name.stdout_lines[1].split() | list }}'
   when:
   - DISA_STIG_RHEL_09_231115 | bool
@@ -3226,7 +3199,8 @@
 
 - name: 'Add noexec Option to /dev/shm: Make sure noexec option is part of the to /dev/shm options'
   set_fact:
-    mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',noexec'' }) }}'
+    mount_info: '{{ mount_info | combine( {''options'':''''~(mount_info.options | default(''''))~('','' if (mount_info.options
+      | default('''')) else '''')~''noexec'' }) }}'
   when:
   - DISA_STIG_RHEL_09_231115 | bool
   - configure_strategy | bool
@@ -3238,7 +3212,7 @@
   - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
     and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
     in ["docker", "lxc", "openvz", "podman", "container"] ) )
-  - mount_info is defined and "noexec" not in mount_info.options
+  - mount_info is defined and "noexec" not in (mount_info.options | default(''))
   tags:
   - CCE-83857-3
   - DISA-STIG-RHEL-09-231115
@@ -3256,12 +3230,17 @@
   - no_reboot_needed
 
 - name: 'Add noexec Option to /dev/shm: Ensure /dev/shm is mounted with noexec option'
-  mount:
+  ansible.posix.mount:
     path: /dev/shm
-    src: '{{ mount_info.source }}'
-    opts: '{{ mount_info.options }}'
+    src: '{{ mount_info.source | default('''') }}'
+    opts: '{{ mount_info.options | default('''') }}'
     state: mounted
-    fstype: '{{ mount_info.fstype }}'
+    fstype: '{{ mount_info.fstype | default('''') }}'
+  register: mount_result
+  failed_when:
+  - mount_result is failed
+  - '''target is busy'' not in (mount_result.msg | default(''''))'
+  - '''already mounted'' not in (mount_result.msg | default(''''))'
   when:
   - DISA_STIG_RHEL_09_231115 | bool
   - configure_strategy | bool
@@ -3292,7 +3271,7 @@
   - no_reboot_needed
 
 - name: 'Add nosuid Option to /dev/shm: Check information associated to mountpoint'
-  command: findmnt  '/dev/shm'
+  ansible.builtin.command: findmnt  '/dev/shm'
   register: device_name
   failed_when: device_name.rc > 1
   changed_when: false
@@ -3328,7 +3307,7 @@
   set_fact:
     mount_info: '{{ mount_info|default({})|combine({item.0: item.1}) }}'
   with_together:
-  - '{{ device_name.stdout_lines[0].split() | list | lower }}'
+  - '{{ device_name.stdout_lines[0].split() | map(''lower'') | list }}'
   - '{{ device_name.stdout_lines[1].split() | list }}'
   when:
   - DISA_STIG_RHEL_09_231120 | bool
@@ -3403,7 +3382,8 @@
 
 - name: 'Add nosuid Option to /dev/shm: Make sure nosuid option is part of the to /dev/shm options'
   set_fact:
-    mount_info: '{{ mount_info | combine( {''options'':''''~mount_info.options~'',nosuid'' }) }}'
+    mount_info: '{{ mount_info | combine( {''options'':''''~(mount_info.options | default(''''))~('','' if (mount_info.options
+      | default('''')) else '''')~''nosuid'' }) }}'
   when:
   - DISA_STIG_RHEL_09_231120 | bool
   - configure_strategy | bool
@@ -3415,7 +3395,7 @@
   - ( not ( "kernel-core" in ansible_facts.packages and "rpm-ostree" in ansible_facts.packages and "bootc" in ansible_facts.packages
     and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type
     in ["docker", "lxc", "openvz", "podman", "container"] ) )
-  - mount_info is defined and "nosuid" not in mount_info.options
+  - mount_info is defined and "nosuid" not in (mount_info.options | default(''))
   tags:
   - CCE-83891-2
   - DISA-STIG-RHEL-09-231120
@@ -3433,12 +3413,17 @@
   - no_reboot_needed
 
 - name: 'Add nosuid Option to /dev/shm: Ensure /dev/shm is mounted with nosuid option'
-  mount:
+  ansible.posix.mount:
     path: /dev/shm
-    src: '{{ mount_info.source }}'
-    opts: '{{ mount_info.options }}'
+    src: '{{ mount_info.source | default('''') }}'
+    opts: '{{ mount_info.options | default('''') }}'
     state: mounted
-    fstype: '{{ mount_info.fstype }}'
+    fstype: '{{ mount_info.fstype | default('''') }}'
+  register: mount_result
+  failed_when:
+  - mount_result is failed
+  - '''target is busy'' not in (mount_result.msg | default(''''))'
+  - '''already mounted'' not in (mount_result.msg | default(''''))'
   when:
   - DISA_STIG_RHEL_09_231120 | bool
   - configure_strategy | bool
@@ -3584,11 +3569,40 @@
   - reboot_required
   - sysctl_kernel_dmesg_restrict
 
+- name: Restrict Access to Kernel Message Buffer - Comment out any occurrences of kernel.dmesg_restrict from /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*kernel.dmesg_restrict
+    replace: '#kernel.dmesg_restrict'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_213010 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - low_severity | bool
+  - medium_disruption | bool
+  - reboot_required | bool
+  - sysctl_kernel_dmesg_restrict | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83952-2
+  - DISA-STIG-RHEL-09-213010
+  - NIST-800-171-3.1.5
+  - NIST-800-53-SI-11(a)
+  - NIST-800-53-SI-11(b)
+  - disable_strategy
+  - low_complexity
+  - low_severity
+  - medium_disruption
+  - reboot_required
+  - sysctl_kernel_dmesg_restrict
+
 - name: Restrict Access to Kernel Message Buffer - Ensure sysctl kernel.dmesg_restrict is set to 1
   ansible.posix.sysctl:
     name: kernel.dmesg_restrict
     value: '1'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/kernel_dmesg_restrict.conf
     state: present
     reload: true
   when:
@@ -3721,11 +3735,38 @@
   - reboot_required
   - sysctl_kernel_kexec_load_disabled
 
+- name: Disable Kernel Image Loading - Comment out any occurrences of kernel.kexec_load_disabled from /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*kernel.kexec_load_disabled
+    replace: '#kernel.kexec_load_disabled'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_213020 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_kexec_load_disabled | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83954-8
+  - DISA-STIG-RHEL-09-213020
+  - NIST-800-53-CM-6
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_kexec_load_disabled
+
 - name: Disable Kernel Image Loading - Ensure sysctl kernel.kexec_load_disabled is set to 1
   ansible.posix.sysctl:
     name: kernel.kexec_load_disabled
     value: '1'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/kernel_kexec_load_disabled.conf
     state: present
     reload: true
   when:
@@ -3862,12 +3903,41 @@
   - reboot_required
   - sysctl_kernel_unprivileged_bpf_disabled
 
+- name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Comment out any occurrences of kernel.unprivileged_bpf_disabled
+    from /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*kernel.unprivileged_bpf_disabled
+    replace: '#kernel.unprivileged_bpf_disabled'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_213075 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_unprivileged_bpf_disabled | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83957-1
+  - DISA-STIG-RHEL-09-213075
+  - NIST-800-53-AC-6
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_unprivileged_bpf_disabled
+
 - name: Disable Access to Network bpf() Syscall From Unprivileged Processes - Ensure sysctl kernel.unprivileged_bpf_disabled
     is set to 1
   ansible.posix.sysctl:
     name: kernel.unprivileged_bpf_disabled
     value: '1'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/kernel_unprivileged_bpf_disabled.conf
     state: present
     reload: true
   when:
@@ -4000,11 +4070,38 @@
   - reboot_required
   - sysctl_kernel_yama_ptrace_scope
 
+- name: Restrict usage of ptrace to descendant processes - Comment out any occurrences of kernel.yama.ptrace_scope from /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*kernel.yama.ptrace_scope
+    replace: '#kernel.yama.ptrace_scope'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_213080 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_yama_ptrace_scope | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83965-4
+  - DISA-STIG-RHEL-09-213080
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_yama_ptrace_scope
+
 - name: Restrict usage of ptrace to descendant processes - Ensure sysctl kernel.yama.ptrace_scope is set to 1
   ansible.posix.sysctl:
     name: kernel.yama.ptrace_scope
     value: '1'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/kernel_yama_ptrace_scope.conf
     state: present
     reload: true
   when:
@@ -4141,11 +4238,40 @@
   - reboot_required
   - sysctl_net_core_bpf_jit_harden
 
+- name: Harden the operation of the BPF just-in-time compiler - Comment out any occurrences of net.core.bpf_jit_harden from
+    /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*net.core.bpf_jit_harden
+    replace: '#net.core.bpf_jit_harden'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_251045 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_net_core_bpf_jit_harden | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83966-2
+  - DISA-STIG-RHEL-09-251045
+  - NIST-800-53-CM-6
+  - NIST-800-53-SC-7(10)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_net_core_bpf_jit_harden
+
 - name: Harden the operation of the BPF just-in-time compiler - Ensure sysctl net.core.bpf_jit_harden is set to 2
   ansible.posix.sysctl:
     name: net.core.bpf_jit_harden
     value: '2'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/net_core_bpf_jit_harden.conf
     state: present
     reload: true
   when:
@@ -4370,11 +4496,41 @@
   - reboot_required
   - sysctl_kernel_kptr_restrict
 
+- name: Restrict Exposed Kernel Pointer Addresses Access - Comment out any occurrences of kernel.kptr_restrict from /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*kernel.kptr_restrict
+    replace: '#kernel.kptr_restrict'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_213025 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_kptr_restrict | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83972-0
+  - DISA-STIG-RHEL-09-213025
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-30
+  - NIST-800-53-SC-30(2)
+  - NIST-800-53-SC-30(5)
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_kptr_restrict
+
 - name: Restrict Exposed Kernel Pointer Addresses Access - Ensure sysctl kernel.kptr_restrict is set
   ansible.posix.sysctl:
     name: kernel.kptr_restrict
     value: '{{ sysctl_kernel_kptr_restrict_value }}'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/kernel_kptr_restrict.conf
     state: present
     reload: true
   when:
@@ -4537,11 +4693,46 @@
   - reboot_required
   - sysctl_kernel_randomize_va_space
 
+- name: Enable Randomized Layout of Virtual Address Space - Comment out any occurrences of kernel.randomize_va_space from
+    /etc/sysctl.conf
+  ansible.builtin.replace:
+    path: '{{ item }}'
+    regexp: ^[\s]*kernel.randomize_va_space
+    replace: '#kernel.randomize_va_space'
+  with_fileglob:
+  - /etc/sysctl.conf
+  when:
+  - DISA_STIG_RHEL_09_213070 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - reboot_required | bool
+  - sysctl_kernel_randomize_va_space | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-83971-2
+  - DISA-STIG-RHEL-09-213070
+  - NIST-800-171-3.1.7
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-SC-30
+  - NIST-800-53-SC-30(2)
+  - PCI-DSS-Req-2.2.1
+  - PCI-DSSv4-3.3
+  - PCI-DSSv4-3.3.1
+  - PCI-DSSv4-3.3.1.1
+  - disable_strategy
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - reboot_required
+  - sysctl_kernel_randomize_va_space
+
 - name: Enable Randomized Layout of Virtual Address Space - Ensure sysctl kernel.randomize_va_space is set to 2
   ansible.posix.sysctl:
     name: kernel.randomize_va_space
     value: '2'
-    sysctl_file: /etc/sysctl.conf
+    sysctl_file: /etc/sysctl.d/kernel_randomize_va_space.conf
     state: present
     reload: true
   when:
@@ -4626,7 +4817,7 @@
 - name: Ensure SELinux State is Enforcing - Check current SELinux state
   ansible.builtin.command:
     cmd: getenforce
-  register: selinux_state
+  register: current_selinux_state
   check_mode: false
   changed_when: false
   when:
@@ -4723,7 +4914,7 @@
   - restrict_strategy | bool
   - selinux_state | bool
   - '"kernel-core" in ansible_facts.packages'
-  - selinux_state.stdout | lower != var_selinux_state
+  - current_selinux_state.stdout | lower != var_selinux_state
   tags:
   - CCE-84079-3
   - DISA-STIG-RHEL-09-431010
@@ -4900,7 +5091,7 @@
       regexp: (?i)(?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -5065,7 +5256,7 @@
       regexp: (?i)(?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -5226,7 +5417,7 @@
       regexp: (?i)(?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -5403,7 +5594,7 @@
       regexp: (?i)(?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
@@ -5574,7 +5765,7 @@
       regexp: (?i)(?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
@@ -5737,7 +5928,7 @@
       regexp: (?i)(?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -5898,7 +6089,7 @@
       regexp: (?i)(?i)^\s*{{ "StrictModes"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -6045,7 +6236,7 @@
       regexp: (?i)(?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -6184,7 +6375,7 @@
       regexp: (?i)(?i)^\s*{{ "LogLevel"| regex_escape }}\s+
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
-    when: _etc_ssh_sshd_config_d_has_parameter.matched
+    when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
@@ -8842,10 +9033,10 @@
   - restrict_strategy
 
 - name: Record Events that Modify User/Group Information - /etc/passwd - Search /etc/audit/rules.d for other rules with specified
-    key audit_rules_usergroup_modification_passwd
+    key audit_rules_usergroup_modification
   ansible.builtin.find:
     paths: /etc/audit/rules.d
-    contains: ^.*(?:-F key=|-k\s+)audit_rules_usergroup_modification_passwd$
+    contains: ^.*(?:-F key=|-k\s+)audit_rules_usergroup_modification$
     patterns: '*.rules'
   register: find_watch_key
   when:
@@ -8880,11 +9071,11 @@
   - no_reboot_needed
   - restrict_strategy
 
-- name: Record Events that Modify User/Group Information - /etc/passwd - Use /etc/audit/rules.d/audit_rules_usergroup_modification_passwd.rules
+- name: Record Events that Modify User/Group Information - /etc/passwd - Use /etc/audit/rules.d/audit_rules_usergroup_modification.rules
     as the recipient for the rule
   ansible.builtin.set_fact:
     all_files:
-    - /etc/audit/rules.d/audit_rules_usergroup_modification_passwd.rules
+    - /etc/audit/rules.d/audit_rules_usergroup_modification.rules
   when:
   - DISA_STIG_RHEL_09_654240 | bool
   - audit_rules_usergroup_modification_passwd | bool
@@ -8958,7 +9149,7 @@
 - name: Record Events that Modify User/Group Information - /etc/passwd - Add watch rule for /etc/passwd in /etc/audit/rules.d/
   ansible.builtin.lineinfile:
     path: '{{ all_files[0] }}'
-    line: -w /etc/passwd -p wa -k audit_rules_usergroup_modification_passwd
+    line: -w /etc/passwd -p wa -k audit_rules_usergroup_modification
     create: true
     mode: '0600'
   when:
@@ -9033,7 +9224,7 @@
 
 - name: Record Events that Modify User/Group Information - /etc/passwd - Add watch rule for /etc/passwd in /etc/audit/audit.rules
   ansible.builtin.lineinfile:
-    line: -w /etc/passwd -p wa -k audit_rules_usergroup_modification_passwd
+    line: -w /etc/passwd -p wa -k audit_rules_usergroup_modification
     state: present
     dest: /etc/audit/audit.rules
     create: true
@@ -11451,7 +11642,6 @@
     patterns: '*.rules'
   register: find_existing_watch_rules_d
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11462,7 +11652,6 @@
   - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
@@ -11487,7 +11676,6 @@
     patterns: '*.rules'
   register: find_watch_key
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11499,7 +11687,6 @@
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
@@ -11522,7 +11709,6 @@
     all_files:
     - /etc/audit/rules.d/logins.rules
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11535,7 +11721,6 @@
     find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
@@ -11557,7 +11742,6 @@
     all_files:
     - '{{ find_watch_key.files | map(attribute=''path'') | list | first }}'
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11570,7 +11754,6 @@
     find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
@@ -11594,7 +11777,6 @@
     create: true
     mode: '0600'
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11606,7 +11788,6 @@
   - find_existing_watch_rules_d.matched is defined and find_existing_watch_rules_d.matched == 0
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
@@ -11631,7 +11812,6 @@
     patterns: audit.rules
   register: find_existing_watch_audit_rules
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11642,7 +11822,6 @@
   - '"kernel-core" in ansible_facts.packages'
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
@@ -11667,7 +11846,6 @@
     create: true
     mode: '0600'
   when:
-  - DISA_STIG_RHEL_09_654260 | bool
   - audit_rules_login_events_tallylog | bool
   - low_complexity | bool
   - low_disruption | bool
@@ -11679,7 +11857,6 @@
   - find_existing_watch_audit_rules.matched is defined and find_existing_watch_audit_rules.matched == 0
   tags:
   - CCE-83782-3
-  - DISA-STIG-RHEL-09-654260
   - NIST-800-171-3.1.7
   - NIST-800-53-AC-6(9)
   - NIST-800-53-AU-12(c)
