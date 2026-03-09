@@ -29,4 +29,8 @@ galaxy_info:
   - e8
 
 
+collections:
+  - community.general
+  - ansible.posix
+
 dependencies: []
