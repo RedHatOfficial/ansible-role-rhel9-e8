@@ -339,6 +339,58 @@
   - special_service_block | bool
   - ( "avahi" in ansible_facts.packages and "kernel-core" in ansible_facts.packages )
 
+- name: Disable KDump Kernel Crash Analyzer (kdump) - Disable service kdump
+  block:
+  - name: Disable KDump Kernel Crash Analyzer (kdump) - Collect systemd Services Present in the System
+    ansible.builtin.command: systemctl -q list-unit-files --type service
+    register: service_exists
+    changed_when: false
+    failed_when: service_exists.rc not in [0, 1]
+    check_mode: false
+  - name: Disable KDump Kernel Crash Analyzer (kdump) - Ensure kdump.service is Masked
+    ansible.builtin.systemd:
+      name: kdump.service
+      state: stopped
+      enabled: false
+      masked: true
+    when: service_exists.stdout_lines is search("kdump.service", multiline=True)
+  - name: Unit Socket Exists - kdump.socket
+    ansible.builtin.command: systemctl -q list-unit-files kdump.socket
+    register: socket_file_exists
+    changed_when: false
+    failed_when: socket_file_exists.rc not in [0, 1]
+    check_mode: false
+  - name: Disable KDump Kernel Crash Analyzer (kdump) - Disable Socket kdump
+    ansible.builtin.systemd:
+      name: kdump.socket
+      enabled: false
+      state: stopped
+      masked: true
+    when: socket_file_exists.stdout_lines is search("kdump.socket", multiline=True)
+  tags:
+  - CCE-84232-8
+  - DISA-STIG-RHEL-09-213115
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - disable_strategy
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - service_kdump_disabled
+  - special_service_block
+  when:
+  - DISA_STIG_RHEL_09_213115 | bool
+  - disable_strategy | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - service_kdump_disabled | bool
+  - special_service_block | bool
+  - '"kernel-core" in ansible_facts.packages'
+
 - name: Enable the File Access Policy Service - Enable service fapolicyd
   block:
   - name: Enable the File Access Policy Service - Enable Service fapolicyd
@@ -1940,7 +1992,7 @@
 
 - name: Lock the password of the user accounts other than root with uid 0
   ansible.builtin.command: passwd -l {{ item.key }}
-  loop: '{{ getent_passwd | dict2items | rejectattr(''key'', ''search'', ''root'') | list }}'
+  loop: '{{ getent_passwd | dict2items | rejectattr(''key'', ''equalto'', ''root'') | list }}'
   when:
   - DISA_STIG_RHEL_09_411100 | bool
   - accounts_no_uid_except_zero | bool
@@ -4992,13 +5044,14 @@
   - no_reboot_needed
   - service_telnet_disabled
 
-- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255040 | bool
   - high_severity | bool
@@ -5028,13 +5081,84 @@
   - restrict_strategy
   - sshd_disable_empty_passwords
 
-- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured correctly
+- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255040 | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_empty_passwords | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90799-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255040
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_empty_passwords
+
+- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+no$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255040 | bool
+  - high_severity | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_empty_passwords | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90799-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255040
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - high_severity
+  - low_complexity
+  - low_disruption
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_empty_passwords
+
+- name: Disable SSH Access via Empty Passwords - Check if the parameter PermitEmptyPasswords is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+no$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255040 | bool
   - high_severity | bool
@@ -5090,7 +5214,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -5110,7 +5234,8 @@
   - restrict_strategy | bool
   - sshd_disable_empty_passwords | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90799-8
   - CJIS-5.5.6
@@ -5167,13 +5292,14 @@
   - restrict_strategy
   - sshd_disable_empty_passwords
 
-- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255135 | bool
   - low_complexity | bool
@@ -5198,13 +5324,74 @@
   - restrict_strategy
   - sshd_disable_gssapi_auth
 
-- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured correctly
+- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255135 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_gssapi_auth | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90808-7
+  - DISA-STIG-RHEL-09-255135
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_gssapi_auth
+
+- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+no$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255135 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_gssapi_auth | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90808-7
+  - DISA-STIG-RHEL-09-255135
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_gssapi_auth
+
+- name: Disable GSSAPI Authentication - Check if the parameter GSSAPIAuthentication is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+no$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255135 | bool
   - low_complexity | bool
@@ -5255,7 +5442,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "GSSAPIAuthentication"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -5275,7 +5462,8 @@
   - restrict_strategy | bool
   - sshd_disable_gssapi_auth | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90808-7
   - DISA-STIG-RHEL-09-255135
@@ -5322,13 +5510,14 @@
   - restrict_strategy
   - sshd_disable_gssapi_auth
 
-- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255145 | bool
   - low_complexity | bool
@@ -5356,13 +5545,80 @@
   - restrict_strategy
   - sshd_disable_rhosts
 
-- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured correctly
+- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255145 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_rhosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90797-2
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255145
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_rhosts
+
+- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+yes$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255145 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_rhosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90797-2
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255145
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_rhosts
+
+- name: Disable SSH Support for .rhosts Files - Check if the parameter IgnoreRhosts is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+yes$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255145 | bool
   - low_complexity | bool
@@ -5416,7 +5672,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -5436,7 +5692,8 @@
   - restrict_strategy | bool
   - sshd_disable_rhosts | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90797-2
   - CJIS-5.5.6
@@ -5489,13 +5746,14 @@
   - restrict_strategy
   - sshd_disable_rhosts
 
-- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255045 | bool
   - low_complexity | bool
@@ -5528,13 +5786,90 @@
   - restrict_strategy
   - sshd_disable_root_login
 
-- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured correctly
+- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255045 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_root_login | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90800-4
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255045
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6(2)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - NIST-800-53-IA-2
+  - NIST-800-53-IA-2(5)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_root_login
+
+- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+no$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255045 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_root_login | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90800-4
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255045
+  - NIST-800-171-3.1.1
+  - NIST-800-171-3.1.5
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6(2)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - NIST-800-53-IA-2
+  - NIST-800-53-IA-2(5)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_root_login
+
+- name: Disable SSH Root Login - Check if the parameter PermitRootLogin is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+no$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255045 | bool
   - low_complexity | bool
@@ -5593,7 +5928,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
     ansible.builtin.lineinfile:
@@ -5613,7 +5948,8 @@
   - restrict_strategy | bool
   - sshd_disable_root_login | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90800-4
   - CJIS-5.5.6
@@ -5676,13 +6012,14 @@
   - restrict_strategy
   - sshd_disable_root_login
 
-- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255150 | bool
   - low_complexity | bool
@@ -5707,13 +6044,76 @@
   - restrict_strategy
   - sshd_disable_user_known_hosts
 
-- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured correctly
+- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255150 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_user_known_hosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90796-4
+  - DISA-STIG-RHEL-09-255150
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_user_known_hosts
+
+- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured correctly in
+    /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+yes$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255150 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_disable_user_known_hosts | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90796-4
+  - DISA-STIG-RHEL-09-255150
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_disable_user_known_hosts
+
+- name: Disable SSH Support for User Known Hosts - Check if the parameter IgnoreUserKnownHosts is configured correctly in
+    /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+yes$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255150 | bool
   - low_complexity | bool
@@ -5764,7 +6164,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "IgnoreUserKnownHosts"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
     ansible.builtin.lineinfile:
@@ -5784,7 +6184,8 @@
   - restrict_strategy | bool
   - sshd_disable_user_known_hosts | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90796-4
   - DISA-STIG-RHEL-09-255150
@@ -5831,13 +6232,14 @@
   - restrict_strategy
   - sshd_disable_user_known_hosts
 
-- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255085 | bool
   - low_complexity | bool
@@ -5866,13 +6268,82 @@
   - restrict_strategy
   - sshd_do_not_permit_user_env
 
-- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured correctly
+- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255085 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_do_not_permit_user_env | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90803-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255085
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_do_not_permit_user_env
+
+- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+no$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255085 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_do_not_permit_user_env | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90803-8
+  - CJIS-5.5.6
+  - DISA-STIG-RHEL-09-255085
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-CM-7(a)
+  - NIST-800-53-CM-7(b)
+  - PCI-DSS-Req-2.2.4
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_do_not_permit_user_env
+
+- name: Do Not Allow SSH Environment Options - Check if the parameter PermitUserEnvironment is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+no$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255085 | bool
   - low_complexity | bool
@@ -5927,7 +6398,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -5947,7 +6418,8 @@
   - restrict_strategy | bool
   - sshd_do_not_permit_user_env | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90803-8
   - CJIS-5.5.6
@@ -6002,13 +6474,14 @@
   - restrict_strategy
   - sshd_do_not_permit_user_env
 
-- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255160 | bool
   - low_complexity | bool
@@ -6032,13 +6505,72 @@
   - restrict_strategy
   - sshd_enable_strictmodes
 
-- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured correctly
+- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255160 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_enable_strictmodes | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90809-5
+  - DISA-STIG-RHEL-09-255160
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_enable_strictmodes
+
+- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+yes$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255160 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_enable_strictmodes | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90809-5
+  - DISA-STIG-RHEL-09-255160
+  - NIST-800-171-3.1.12
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_enable_strictmodes
+
+- name: Enable Use of Strict Mode Checking - Check if the parameter StrictModes is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "StrictModes"| regex_escape }}\s+yes$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255160 | bool
   - low_complexity | bool
@@ -6088,7 +6620,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "StrictModes"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -6108,7 +6640,8 @@
   - restrict_strategy | bool
   - sshd_enable_strictmodes | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90809-5
   - DISA-STIG-RHEL-09-255160
@@ -6153,13 +6686,14 @@
   - restrict_strategy
   - sshd_enable_strictmodes
 
-- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - DISA_STIG_RHEL_09_255165 | bool
   - low_complexity | bool
@@ -6181,13 +6715,68 @@
   - restrict_strategy
   - sshd_print_last_log
 
-- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured correctly
+- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - DISA_STIG_RHEL_09_255165 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_print_last_log | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90804-6
+  - DISA-STIG-RHEL-09-255165
+  - NIST-800-53-AC-9
+  - NIST-800-53-AC-9(1)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_print_last_log
+
+- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+yes$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - DISA_STIG_RHEL_09_255165 | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_print_last_log | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90804-6
+  - DISA-STIG-RHEL-09-255165
+  - NIST-800-53-AC-9
+  - NIST-800-53-AC-9(1)
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_print_last_log
+
+- name: Enable SSH Print Last Log - Check if the parameter PrintLastLog is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+yes$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - DISA_STIG_RHEL_09_255165 | bool
   - low_complexity | bool
@@ -6235,7 +6824,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "PrintLastLog"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -6255,7 +6844,8 @@
   - restrict_strategy | bool
   - sshd_print_last_log | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90804-6
   - DISA-STIG-RHEL-09-255165
@@ -6296,13 +6886,14 @@
   - restrict_strategy
   - sshd_print_last_log
 
-- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured
-  ansible.builtin.find:
-    paths:
-    - /etc/ssh/sshd_config
-    - /etc/ssh/sshd_config.d
-    contains: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+
-  register: _sshd_config_has_parameter
+- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_has_parameter
   when:
   - low_complexity | bool
   - low_disruption | bool
@@ -6322,13 +6913,64 @@
   - restrict_strategy
   - sshd_set_loglevel_info
 
-- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured correctly
+- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured in /etc/ssh/sshd_config.d
   ansible.builtin.find:
     paths:
-    - /etc/ssh/sshd_config
+    - /etc/ssh/sshd_config.d
+    contains: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+
+  register: _config_dir_has_parameter
+  when:
+  - low_complexity | bool
+  - low_disruption | bool
+  - low_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_set_loglevel_info | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90813-7
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - low_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_set_loglevel_info
+
+- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured correctly in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+INFO$
+    state: absent
+  check_mode: true
+  changed_when: false
+  register: _config_file_correctly
+  when:
+  - low_complexity | bool
+  - low_disruption | bool
+  - low_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - sshd_set_loglevel_info | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90813-7
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-CM-6(a)
+  - low_complexity
+  - low_disruption
+  - low_severity
+  - no_reboot_needed
+  - restrict_strategy
+  - sshd_set_loglevel_info
+
+- name: Set LogLevel to INFO - Check if the parameter LogLevel is configured correctly in /etc/ssh/sshd_config.d
+  ansible.builtin.find:
+    paths:
     - /etc/ssh/sshd_config.d
     contains: (?i)^\s*{{ "LogLevel"| regex_escape }}\s+INFO$
-  register: _sshd_config_correctly
+  register: _config_dir_correctly
   when:
   - low_complexity | bool
   - low_disruption | bool
@@ -6374,7 +7016,7 @@
       create: false
       regexp: (?i)(?i)^\s*{{ "LogLevel"| regex_escape }}\s+
       state: absent
-    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files }}'
+    with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
   - name: Insert correct line to /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
     ansible.builtin.lineinfile:
@@ -6393,7 +7035,8 @@
   - restrict_strategy | bool
   - sshd_set_loglevel_info | bool
   - '"kernel-core" in ansible_facts.packages'
-  - _sshd_config_correctly.matched == 0 or _sshd_config_has_parameter.matched != 1
+  - (_config_file_correctly.found == 0 and _config_dir_correctly.matched == 0) or ((_config_file_has_parameter.found | int)
+    + (_config_dir_has_parameter.matched | int)) != 1
   tags:
   - CCE-90813-7
   - NIST-800-53-AC-17(a)
