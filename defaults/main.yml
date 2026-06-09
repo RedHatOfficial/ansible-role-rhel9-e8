@@ -16,6 +16,7 @@ DISA_STIG_RHEL_09_213070: true
 DISA_STIG_RHEL_09_213075: true
 DISA_STIG_RHEL_09_213080: true
 DISA_STIG_RHEL_09_213110: true
+DISA_STIG_RHEL_09_213115: true
 DISA_STIG_RHEL_09_214010: true
 DISA_STIG_RHEL_09_214015: true
 DISA_STIG_RHEL_09_214020: true
@@ -153,6 +154,7 @@ service_auditd_enabled: true
 service_avahi_daemon_disabled: true
 service_fapolicyd_enabled: true
 service_firewalld_enabled: true
+service_kdump_disabled: true
 service_rsyslog_enabled: true
 service_squid_disabled: true
 service_telnet_disabled: true
